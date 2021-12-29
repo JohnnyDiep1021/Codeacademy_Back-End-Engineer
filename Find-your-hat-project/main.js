@@ -53,15 +53,32 @@ class Field {
     return [c, r];
   }
 
+  trackPlayer(row, col, type, player) {
+    if (this.checkObstacle(row, col, type)) return true;
+    else if (this.checkBoundary(row, col)) console.log("Get another way!");
+    else this.updateMap(row, col, player);
+  }
+
   checkObstacle(row, col, type) {
     if (this.#field[row][col] === type) {
       return true;
     }
   }
 
+  checkBoundary(row, col) {
+    if (
+      row > this.#field.length - 1 ||
+      row < 0 ||
+      col > this.#field[row].length - 1 ||
+      col < 0
+    ) {
+      console.log("Get another direction!");
+      return true;
+    }
+  }
+
   updateMap(row, col, type) {
     this.#field[row][col] = type;
-    // this.print();
   }
 }
 
@@ -92,20 +109,8 @@ class Player {
   }
 }
 
-// class Game {
-//   #map;
-//   #player;
-//   #goal;
-//   constructor(map, player, goal) {
-//     this.#map = map;
-//     this.#player = player;
-//     this.#goal = goal;
-//   }
-
-//   // Methods
-// }
-const [width, height] = [20, 10];
 let isGameOver = false;
+const [width, height] = [20, 10];
 const f = new Field(Field.generateField(width, height, 0.6));
 posHat = f.initPos(height, width, hat);
 posPlayer = f.initPos(height, width, pathCharacter);
@@ -113,7 +118,6 @@ f.print();
 
 const player = new Player(...posPlayer);
 console.log("Player position: ", player.posY, player.posX);
-
 while (!isGameOver) {
   const direction = prompt(
     "Which direction you want to go (W-A-D-S)? "
@@ -123,42 +127,50 @@ while (!isGameOver) {
   switch (direction) {
     case "W":
       player.posY--;
-      if (f.checkObstacle(player.posY, player.posX, hole)) {
+      if (f.checkBoundary(player.posY, player.posX)) {
+        player.posY++;
+      } else if (f.checkObstacle(player.posY, player.posX, hole)) {
         isGameOver = true;
-        break;
+      } else {
+        f.updateMap(player.posY, player.posX, pathCharacter);
+        console.log(`Move Up! (row: ${player.posY}, col ${player.posX})`);
       }
-      f.updateMap(player.posY, player.posX, pathCharacter);
-      // f.field[player.posY][player.posX] = pathCharacter;
-      console.log(`Move Up! (row: ${player.posY}, col ${player.posX})`);
       break;
     case "S":
       player.posY++;
-      if (f.checkObstacle(player.posY, player.posX, hole)) {
+      if (f.checkBoundary(player.posY, player.posX)) {
+        player.posY--;
+      } else if (f.checkObstacle(player.posY, player.posX, hole)) {
         isGameOver = true;
-        break;
+      } else {
+        f.updateMap(player.posY, player.posX, pathCharacter);
+        console.log(`Move Down! (row: ${player.posY}, col ${player.posX})`);
       }
-      f.updateMap(player.posY, player.posX, pathCharacter);
-      console.log(`Move Down! (row: ${player.posY}, col ${player.posX})`);
       break;
     case "A":
       player.posX--;
-      if (f.checkObstacle(player.posY, player.posX, hole)) {
+      if (f.checkBoundary(player.posY, player.posX)) {
+        player.posX++;
+      } else if (f.checkObstacle(player.posY, player.posX, hole)) {
         isGameOver = true;
-        break;
+      } else {
+        f.updateMap(player.posY, player.posX, pathCharacter);
+        console.log(`Move Left! (row: ${player.posY}, col ${player.posX})`);
       }
-      f.updateMap(player.posY, player.posX, pathCharacter);
-      console.log(`Move Left! (row: ${player.posY}, col ${player.posX})`);
       break;
     case "D":
       player.posX++;
-      if (f.checkObstacle(player.posY, player.posX, hole)) {
+      if (f.checkBoundary(player.posY, player.posX)) {
+        player.posX--;
+      } else if (f.checkObstacle(player.posY, player.posX, hole)) {
         isGameOver = true;
-        break;
+      } else {
+        f.updateMap(player.posY, player.posX, pathCharacter);
+        console.log(`Move Right! (row: ${player.posY}, col ${player.posX})`);
       }
-      f.updateMap(player.posY, player.posX, pathCharacter);
-      console.log(`Move Right! (row: ${player.posY}, col ${player.posX})`);
       break;
     default:
+      console.log(`>>>'${direction}' => invalid movement! Try again!`);
       break;
   }
   if (player.posX === posHat[0] && player.posY === posHat[1]) {
