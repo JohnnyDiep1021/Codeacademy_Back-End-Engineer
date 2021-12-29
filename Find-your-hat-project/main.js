@@ -1,43 +1,29 @@
 const prompt = require("prompt-sync")({ sigint: true });
-
 const hat = "^";
 const hole = "O";
 const fieldCharacter = "░";
 const pathCharacter = "*";
-// const name = prompt("Enter your name: ");
+
 class Field {
   #field;
-  // #initPlayer;
-  // #initHat;
 
   constructor(arr) {
     this.#field = arr;
-    // this.#initPlayer = Field.randomGrid(x, y);
-    // this.#initHat = Field.randomGrid(x, y);
   }
 
   // Getters
   get field() {
     return this.#field;
   }
-  // get playerPos() {
-  //   return this.#initPlayer;
-  // }
-  // get hatPos() {
-  //   return this.#initHat;
-  // }
+
   // Methods
   print() {
-    // console.log(this.#field);
     for (let row = 0; row < this.#field.length; row++) {
       console.log(this.#field[row].join(""));
-      // for (let col = 0; col < this.#field[row].length; col++) {
-      //   console.log(this.#field[row][col]);
-      // }
     }
   }
 
-  static randomGrid(row, column) {
+  static randomPos(row, column) {
     const randRow = Math.floor(Math.random() * row);
     const randCol = Math.floor(Math.random() * column);
     return [randRow, randCol];
@@ -47,6 +33,8 @@ class Field {
     // Randomize tiles and obstacles for the field
     let arr = [];
     let tiles = ["░", "O"];
+
+    // row-height, col-width
     for (let h = 0; h < height; h++) {
       let row = [];
       for (let w = 0; w < width; w++) {
@@ -55,30 +43,130 @@ class Field {
       }
       arr.push(row);
     }
-
-    // // Generate start point for player and hat
-    // const randPlayer = this.setPlayer(height, width);
-    // const randHat = this.setHat(height, width);
-    const randPlayer = Field.randomGrid(height, width);
-    const randHat = Field.randomGrid(height, width);
-    arr[randHat[0]][randHat[1]] = hat;
-    arr[randPlayer[0]][randPlayer[1]] = pathCharacter;
-
     return arr;
   }
 
-  // #setPlayer(x, y) {}
-  // #setHat(x, y) {}
+  initPos(row, col, type) {
+    const [r, c] = Field.randomPos(row, col);
+    this.#field[r][c] = type;
+    // x - col, y - row
+    return [c, r];
+  }
+
+  checkObstacle(row, col, type) {
+    if (this.#field[row][col] === type) {
+      return true;
+    }
+  }
+
+  updateMap(row, col, type) {
+    this.#field[row][col] = type;
+    // this.print();
+  }
 }
 
 class Player {
   #posX;
   #posY;
+
   constructor(posX, posY) {
     this.#posX = posX;
     this.#posY = posY;
   }
-}
-const f = new Field(Field.generateField(20, 10, 0.6));
 
+  // Getters
+  get posX() {
+    return this.#posX;
+  }
+  get posY() {
+    return this.#posY;
+  }
+
+  // method
+  set posX(x) {
+    this.#posX = x;
+  }
+
+  set posY(y) {
+    this.#posY = y;
+  }
+}
+
+// class Game {
+//   #map;
+//   #player;
+//   #goal;
+//   constructor(map, player, goal) {
+//     this.#map = map;
+//     this.#player = player;
+//     this.#goal = goal;
+//   }
+
+//   // Methods
+// }
+const [width, height] = [20, 10];
+let isGameOver = false;
+const f = new Field(Field.generateField(width, height, 0.6));
+posHat = f.initPos(height, width, hat);
+posPlayer = f.initPos(height, width, pathCharacter);
 f.print();
+
+const player = new Player(...posPlayer);
+console.log("Player position: ", player.posY, player.posX);
+
+while (!isGameOver) {
+  const direction = prompt(
+    "Which direction you want to go (W-A-D-S)? "
+  ).toUpperCase()[0];
+
+  // Player => x = width (col), y = height (row)
+  switch (direction) {
+    case "W":
+      player.posY--;
+      if (f.checkObstacle(player.posY, player.posX, hole)) {
+        isGameOver = true;
+        break;
+      }
+      f.updateMap(player.posY, player.posX, pathCharacter);
+      // f.field[player.posY][player.posX] = pathCharacter;
+      console.log(`Move Up! (row: ${player.posY}, col ${player.posX})`);
+      break;
+    case "S":
+      player.posY++;
+      if (f.checkObstacle(player.posY, player.posX, hole)) {
+        isGameOver = true;
+        break;
+      }
+      f.updateMap(player.posY, player.posX, pathCharacter);
+      console.log(`Move Down! (row: ${player.posY}, col ${player.posX})`);
+      break;
+    case "A":
+      player.posX--;
+      if (f.checkObstacle(player.posY, player.posX, hole)) {
+        isGameOver = true;
+        break;
+      }
+      f.updateMap(player.posY, player.posX, pathCharacter);
+      console.log(`Move Left! (row: ${player.posY}, col ${player.posX})`);
+      break;
+    case "D":
+      player.posX++;
+      if (f.checkObstacle(player.posY, player.posX, hole)) {
+        isGameOver = true;
+        break;
+      }
+      f.updateMap(player.posY, player.posX, pathCharacter);
+      console.log(`Move Right! (row: ${player.posY}, col ${player.posX})`);
+      break;
+    default:
+      break;
+  }
+  if (player.posX === posHat[0] && player.posY === posHat[1]) {
+    console.log(`Congratulation! You found your hat!`);
+    isGameOver = true;
+  } else if (isGameOver) {
+    console.log(`Oh no! You fell down a hole!`);
+  } else {
+    f.print();
+  }
+}
