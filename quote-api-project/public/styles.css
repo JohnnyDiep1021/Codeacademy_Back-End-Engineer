@@ -4,7 +4,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: "Nunito Sans", sans-serif;
 }
 
 h1 {
@@ -58,10 +58,22 @@ button:hover {
   width: 60%;
 }
 
+#quote-id {
+  grid-row: 1 / 3;
+}
+
 .single-quote {
+  margin-bottom: 4px;
   padding: 10px;
+  display: grid;
+  grid-template-columns: auto 2fr;
+  gap: 4px 8px;
 }
 
 .quote-text {
   font-style: italic;
+}
+
+.attribution {
+  color: #8cffda;
 }
