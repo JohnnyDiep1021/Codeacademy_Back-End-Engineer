@@ -1,6 +1,7 @@
 const fetchAllButton = document.getElementById("fetch-quotes");
 const fetchRandomButton = document.getElementById("fetch-random");
 const fetchByAuthorButton = document.getElementById("fetch-by-author");
+const fetchByIdButton = document.getElementById("fetch-by-id");
 
 const quoteContainer = document.getElementById("quote-container");
 const quoteText = document.querySelector(".quote");
@@ -22,7 +23,8 @@ const renderQuotes = (quotes = []) => {
     quotes.forEach((quote) => {
       const newQuote = document.createElement("div");
       newQuote.className = "single-quote";
-      newQuote.innerHTML = `<div id= "quote-id">${quote.id}.</div><div class="quote-text">${quote.quote}</div>
+      newQuote.innerHTML = `<div id= "quote-id">${quote.id}.</div>
+      <div class="quote-text">${quote.quote}</div>
       <div class="attribution">- ${quote.person}</div>`;
       quoteContainer.appendChild(newQuote);
     });
@@ -62,6 +64,21 @@ fetchRandomButton.addEventListener("click", () => {
 fetchByAuthorButton.addEventListener("click", () => {
   const author = document.getElementById("author").value;
   fetch(`/api/quotes?person=${author}`)
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        renderError(response);
+      }
+    })
+    .then((response) => {
+      renderQuotes(response.quotes);
+    });
+});
+
+fetchByIdButton.addEventListener("click", () => {
+  const id = document.getElementById("id").value;
+  fetch(`/api/quotes?id=${id}`)
     .then((response) => {
       if (response.ok) {
         return response.json();
