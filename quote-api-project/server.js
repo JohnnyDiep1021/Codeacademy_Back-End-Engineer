@@ -46,17 +46,29 @@ app.post("/api/quotes", (req, res, next) => {
   }
 });
 
+// Get the http request from the client-side and handle request
 app.put("/api/quotes/:id", (req, res, next) => {
   const quoteIndex = getIndexById(req.params.id, quotes);
   if (quoteIndex !== -1) {
-    console.log(req.params, req.query);
+    console.log("Update Quote", req.params, req.query);
     updateElement(req.params.id, req.query, quotes);
+    // Send back the http response to the client-side
     res.send(quotes[quoteIndex]);
   } else {
     res.status(404).send();
   }
 });
 
+app.delete("/api/quotes/:id", (req, res, next) => {
+  const quoteIndex = getIndexById(req.params.id, quotes);
+  if (quoteIndex !== -1) {
+    const deleteQuote = quotes.splice(quoteIndex, 1)[0];
+    console.log("Delete Quote", deleteQuote);
+    res.status(204).send(deleteQuote);
+  } else {
+    res.status(404).send();
+  }
+});
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}.`);
 });
