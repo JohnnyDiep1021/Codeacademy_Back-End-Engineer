@@ -1,22 +1,27 @@
-const updateButton = document.getElementById("update-quote");
+const deleteButton = document.getElementById("delete-quote");
 const newQuoteContainer = document.getElementById("new-quote");
 
-updateButton.addEventListener("click", () => {
+deleteButton.addEventListener("click", () => {
   const id = document.getElementById("id").value;
-  const quote = document.getElementById("quote").value;
-  const person = document.getElementById("person").value;
+  // const quote = document.getElementById("quote").value;
+  // const person = document.getElementById("person").value;
 
   // send the http request to the server-side
-  fetch(`/api/quotes/${id}?quote=${quote}&person=${person}`, {
-    method: "PUT",
+  fetch(`/api/quotes/${id}`, {
+    method: "DELETE",
   })
-    .then((response) => response.json())
+    // promise return rejection, then the rest will not be executed
+    // .then((response) => {
+    //   console.log(response.json());
+    //   return response.json();
+    // })
+    // .then((response) => response.json())
     // retrieve the http response from the server-side
     .then((quote) => {
       const newQuote = document.createElement("div");
-      // console.log(quote);
+      console.log(quote);
       newQuote.innerHTML = `
-    <h3>Congrats, your quote was updated!</h3>
+    <h3>Delete your quote successfully!</h3>
     <div class="quote-text"><span>${quote.id}.</span> ${quote.quote}</div>
     <div class="attribution">- ${quote.person}</div>
     <p>Go to the <a href="index.html">home page</a> to request and view all quotes.</p>
