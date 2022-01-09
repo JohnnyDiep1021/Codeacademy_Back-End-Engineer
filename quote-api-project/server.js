@@ -64,7 +64,8 @@ app.delete("/api/quotes/:id", (req, res, next) => {
   if (quoteIndex !== -1) {
     const deleteQuote = quotes.splice(quoteIndex, 1)[0];
     console.log("Delete Quote", deleteQuote);
-    res.status(204).send(deleteQuote);
+    // res.status(204).send(deleteQuote);
+    res.status(204).send();
   } else {
     res.status(404).send();
   }
