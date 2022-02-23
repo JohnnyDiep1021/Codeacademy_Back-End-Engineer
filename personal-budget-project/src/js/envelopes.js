@@ -1,20 +1,24 @@
+const lodash = require("lodash");
+const morgan = require("morgan");
+
 const envelopesRouter = require("express").Router();
 const Envelope = require("../db/model/envelope");
-const morgan = require("morgan");
 const {
   addToDatabase,
   getAllFromDatabase,
   getFromDatabaseById,
+  updateInstanceInDatabase,
 } = require("./utils");
 const { type } = require("express/lib/response");
 const { reset } = require("nodemon");
 
 envelopesRouter.use(morgan("dev"));
 
-envelopesRouter.param("envelopeId", async (req, res, next, id) => {
-  const envelope = await getFromDatabaseById("envelopes", id);
+envelopesRouter.param("envelopeId", async (req, res, next, envelopeId) => {
+  const envelope = await getFromDatabaseById("envelopes", { envelopeId });
   if (!envelope) return res.status(404).send();
   req.envelope = envelope;
+  // console.log(req.envelope);
   next();
 });
 
@@ -77,10 +81,29 @@ envelopesRouter.get("/:envelopeId", async (req, res, next) => {
   try {
     res.send(req.envelope);
   } catch (error) {
-    res.status(500).send(500);
+    res.status(500).send(error);
   }
 });
 
 // PUT/PATCH/UPDATE envelope by Id
-envelopesRouter.put("/:envelopeId", async (req, res, next) => {});
+envelopesRouter.put("/:envelopeId", async (req, res, next) => {
+  // console.log(req.body);
+  // console.log(req.params.envelopeId);
+  try {
+    if (lodash.isEmpty(req.body))
+      return res.status(400).send({ error: "Invalid update!" });
+    const updatedEnvelope = await updateInstanceInDatabase(
+      "envelopes",
+      req.body,
+      { envelopeId: req.envelope.envelopeId }
+    );
+    if (!updatedEnvelope) return res.status(404).send();
+    if (updatedEnvelope.error)
+      return res.status(400).send(updatedEnvelope.error);
+    res.send(updatedEnvelope);
+  } catch (error) {
+    res.status(404).send(error);
+  }
+});
+
 module.exports = envelopesRouter;

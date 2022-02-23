@@ -1,5 +1,5 @@
-const res = require("express/lib/response");
 const Envelope = require("../db/model/envelope");
+
 const findDatabaseByName = function (name) {
   switch (name) {
     case "envelopes":
@@ -34,7 +34,8 @@ const getFromDatabaseById = async function (modelType, id) {
   try {
     const model = findDatabaseByName(modelType);
     if (model === null) throw new Error(`Invalid database model!`);
-    const data = await model.findOne({ envelopeId: id });
+    // const data = await model.findOne({ envelopeId: id });
+    const data = await model.findOne(id);
     return data;
   } catch (error) {
     throw error;
@@ -60,10 +61,29 @@ const addToDatabase = async function (modelType, instance) {
   }
 };
 
-const updateInstanceInDatabase = async function (modelType, instance) {
+const updateInstanceInDatabase = async function (modelType, instance, id) {
   try {
     const model = findDatabaseByName(modelType);
-    if (model === null) throw new Error(`Invalid database model!`);
+    if (!model) throw new Error(`Invalid database model!`);
+
+    const data = await model.findOne(id);
+    // const data = await getFromDatabaseById(modelType, id);
+    if (!data) return null;
+
+    const updates = Object.keys(instance);
+    // console.log(updates);
+
+    const updateFields = await model.getProperty();
+    // console.log(updateFields);
+
+    const isValidUpdate = updates.every((update) =>
+      updateFields.includes(update)
+    );
+    if (!isValidUpdate) return { error: `Invalid updates!` };
+
+    updates.forEach((update) => (data[update] = instance[update]));
+    await data.save();
+    return instance;
   } catch (error) {
     throw error;
   }
@@ -72,4 +92,5 @@ module.exports = {
   getAllFromDatabase,
   getFromDatabaseById,
   addToDatabase,
+  updateInstanceInDatabase,
 };

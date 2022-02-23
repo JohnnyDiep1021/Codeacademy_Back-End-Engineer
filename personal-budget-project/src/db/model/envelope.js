@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 
-const Envelopes = mongoose.model("Envelopes", {
+// Create schema for new model
+const envelopesSchema = mongoose.Schema({
   category: {
     type: String,
     trim: true,
@@ -21,5 +22,12 @@ const Envelopes = mongoose.model("Envelopes", {
     type: String,
   },
 });
+
+// create model methods
+envelopesSchema.statics.getProperty = async function () {
+  // console.log(Object.keys(this.db));
+  return Object.keys(this.schema.obj);
+};
+const Envelopes = mongoose.model("Envelopes", envelopesSchema);
 
 module.exports = Envelopes;
