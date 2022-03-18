@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
-const apiRouter = require("./src/js/api");
+const apiRouter = require("./src/server/api");
 app.use("/api", apiRouter);
 
 app.listen(PORT, () => {

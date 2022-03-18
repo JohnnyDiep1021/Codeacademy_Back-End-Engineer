@@ -8,13 +8,13 @@ const envelopesSchema = mongoose.Schema({
     trim: true,
     required: true,
   },
-  expense: {
+  budget: {
     type: Number,
     default: 0,
     required: true,
     validate(val) {
       if (val < 0) {
-        throw new Error(`Expense must be a positive number`);
+        throw new Error(`Budget must be a positive number`);
       }
     },
   },

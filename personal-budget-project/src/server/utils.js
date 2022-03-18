@@ -23,7 +23,7 @@ const createRandomId = function (max) {
 const getAllFromDatabase = async function (modelType) {
   try {
     const model = findDatabaseByName(modelType);
-    if (model === null) throw new Error(`Invalid database model!`);
+    if (!model) throw new Error(`Invalid database model!`);
     return await model.find({});
   } catch (error) {
     throw error;
@@ -33,7 +33,7 @@ const getAllFromDatabase = async function (modelType) {
 const getFromDatabaseById = async function (modelType, id) {
   try {
     const model = findDatabaseByName(modelType);
-    if (model === null) throw new Error(`Invalid database model!`);
+    if (!model) throw new Error(`Invalid database model!`);
     // const data = await model.findOne({ envelopeId: id });
     const data = await model.findOne(id);
     return data;
@@ -51,7 +51,7 @@ const getFromDatabaseById = async function (modelType, id) {
 const addToDatabase = async function (modelType, instance) {
   try {
     const model = findDatabaseByName(modelType);
-    if (model === null) throw new Error(`Invalid database model!`);
+    if (!model) throw new Error(`Invalid database model!`);
     instance.envelopeId = createRandomId(9);
     const data = new model(instance);
     await data.save();
@@ -88,9 +88,67 @@ const updateInstanceInDatabase = async function (modelType, instance, id) {
     throw error;
   }
 };
+
+const transferBudget = async function (
+  { from: fromId, to: toId } = {},
+  { amount } = { amount: 0 },
+  modelType = "envelopes"
+) {
+  try {
+    const model = findDatabaseByName(modelType);
+    if (!model) throw new Error(`Invalid database model!`);
+
+    if (!fromId || !toId) return null;
+
+    const fromEnvId = await model.findOne({ envelopeId: fromId });
+    const toEnvId = await model.findOne({ envelopeId: toId });
+    if (!fromEnvId || !toEnvId) return { error: "Invalid envelope Id!" };
+
+    if (amount < 0) throw new Error("Positive numbers are required!");
+    if (fromEnvId.budget < amount)
+      throw new Error("Budget is inadequate to complete transaction!");
+    fromEnvId.budget -= amount;
+    toEnvId.budget += amount;
+    fromEnvId.save();
+    toEnvId.save();
+
+    return true;
+  } catch (error) {
+    error.status = 400;
+    throw error;
+  }
+};
+
+const deleteFromDatabaseById = async function (id, modelType) {
+  try {
+    const model = findDatabaseByName(modelType);
+    if (!model) throw new Error(`Invalid database model`);
+
+    const deleteResult = await model.deleteOne(id);
+    return deleteResult.deletedCount;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const deleteAllFromDatabase = async function (modelType) {
+  try {
+    const model = findDatabaseByName(modelType);
+    if (!model) throw new Error(`Invalid database model!`);
+
+    const deleteResult = await model.deleteMany();
+    return deleteResult.deletedCount;
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getAllFromDatabase,
   getFromDatabaseById,
   addToDatabase,
   updateInstanceInDatabase,
+  transferBudget,
+  deleteFromDatabaseById,
+  deleteAllFromDatabase,
 };
