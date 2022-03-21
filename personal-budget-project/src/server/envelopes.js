@@ -1,5 +1,7 @@
 const envelopesRouter = require("express").Router();
+const auth = require("../middleware/auth");
 
+// 3rd party module/lib
 const lodash = require("lodash");
 const morgan = require("morgan");
 /*
@@ -25,37 +27,48 @@ const {
 const { type, append } = require("express/lib/response");
 const { reset } = require("nodemon");
 
-envelopesRouter.param("envelopeId", async (req, res, next, envelopeId) => {
-  //In router.param, although the error will be caught by the error-handling middle, the route handler embedded with the route parameter will still be fired
-  const envelope = await getFromDatabaseById("envelopes", { envelopeId });
-  if (!envelope) {
-    const err = new Error("Cannot find envelope with the provided Id");
-    err.status = 404;
-    next(err);
-    // return res.status(404).send()
-  } else {
+// This will run before router.use()
+// METHOD-1 => using router.param() cannot accept auth middleware function => fail to authenticate user
+// envelopesRouter.param("envelopeId", async (req, res, next, envelopeId) => {})
+
+// METHOD-2 => using router.use() will be more efficient coz it can perform authentication by using auth middleware function for every route handler with "/:envelopeId"
+// envelopesRouter.use("/:envelopeId", auth, async (req, res, next) => { }
+// envelopesRouter.use(/\/\:envelopeId$/, auth, async (req, res, next) => { }
+envelopesRouter.use("/:envelopeId$/", auth, async (req, res, next) => {
+  // next() middleware will not stop the execution of the code following it, use return next() instead
+  try {
+    console.log(req.params);
+    const envelope = await getFromDatabaseById(
+      "envelopes",
+      { envelopeId: req.params.envelopeId },
+      req.user._id
+    );
+    // console.log(envelope);
+    if (!envelope) {
+      const err = new Error("Cannot find envelope with the provided Id");
+      err.status = 404;
+      return next(err);
+      // return res.status(404).send()
+    }
     req.envelope = envelope;
     next();
+  } catch (err) {
+    next(err);
   }
 });
 
 // POST/CREATE new envelope
-envelopesRouter.post("/", async (req, res, next) => {
-  // Method-1
-  // const envelope = new Envelope(req.body);
-  // try {
-  //   await envelope.save();
-  //   res.status(201).send(envelope);
-  // } catch (error) {
-  //   res.status(400).send(error);
-  // }
-
-  // Method-2
+envelopesRouter.post("/", auth, async (req, res, next) => {
   try {
-    const newEnvelope = await addToDatabase("envelopes", req.body);
+    const newEnvelope = await addToDatabase(
+      "envelopes",
+      req.body,
+      req.user._id
+    );
     console.log("Envelope added!", newEnvelope);
     res.status(201).send(newEnvelope);
   } catch (error) {
+    console.log(error);
     error.status = 400;
     error.message = "Missing requisite information to create a new envelope";
     next(error);
@@ -64,19 +77,14 @@ envelopesRouter.post("/", async (req, res, next) => {
 });
 
 // GET/READ all envelopes
-envelopesRouter.get("/", async (req, res, next) => {
-  // Method-1
-  // try {
-  //   const envelope = await Envelope.find({});
-  //   console.log(envelope.length);
-  //   res.send(envelope);
-  // } catch (error) {
-  //   res.status(500).send(error);
-  // }
-
-  // Method-2
+envelopesRouter.get("/", auth, async (req, res, next) => {
   try {
-    const data = await getAllFromDatabase("envelopes");
+    const data = await getAllFromDatabase("envelopes", req.user._id);
+    if (!data) {
+      const err = new Error(`No data was found!`);
+      err.status = 404;
+      throw err;
+    }
     res.send(data);
   } catch (error) {
     next(error);
@@ -86,17 +94,6 @@ envelopesRouter.get("/", async (req, res, next) => {
 
 // GET/READ envelope by Id
 envelopesRouter.get("/:envelopeId", async (req, res, next) => {
-  // Method-1
-  // const id = req.params.envelopeId;
-  // try {
-  //   const envelope = await Envelope.findOne({ envelopeId: id });
-  //   if (!envelope) return res.status(404).send(`Invalid envelopeId!`);
-  //   res.send(envelope);
-  // } catch (error) {
-  //   res.status(500).send(error);
-  // }
-
-  // Method-2
   try {
     res.send(req.envelope);
   } catch (error) {
@@ -107,24 +104,19 @@ envelopesRouter.get("/:envelopeId", async (req, res, next) => {
 
 // PUT/PATCH/UPDATE envelope by Id
 envelopesRouter.put("/:envelopeId", async (req, res, next) => {
-  console.log(`Request received!`);
   try {
-    if (lodash.isEmpty(req.body)) {
-      const err = new Error("Please, provide new information to update");
-      err.status = 400;
-      next(err);
-      // return res.status(400).send({ error: "Invalid update!" });
-    }
     const updatedEnvelope = await updateInstanceInDatabase(
       "envelopes",
       req.body,
-      { envelopeId: req.envelope.envelopeId }
+      undefined,
+      req.user._id,
+      req.envelope
     );
-    // if (!updatedEnvelope) return res.status(404).send();
+
     if (updatedEnvelope.error) {
       const err = new Error(updatedEnvelope.error);
       err.status = 400;
-      next(err);
+      return next(err);
       // return res.status(400).send(updatedEnvelope.error);
     }
     res.send(updatedEnvelope);
@@ -135,14 +127,15 @@ envelopesRouter.put("/:envelopeId", async (req, res, next) => {
 });
 
 // TRANSFER BUDGET
-envelopesRouter.post("/transfer/:from/:to", async (req, res, next) => {
+envelopesRouter.post("/transfer/:from/:to", auth, async (req, res, next) => {
   try {
-    const transfer = await transferBudget(req.params, req.body);
+    console.log(req.params);
+    const transfer = await transferBudget(req.params, req.body, req.user._id);
 
     if (transfer.error) {
       const err = new Error(transfer.error);
       err.status = 404;
-      next(err);
+      return next(err);
       // return res.status(404).send(transfer.error)
     }
     res.send({ message: "Transfer budget successfully!" });
@@ -155,12 +148,9 @@ envelopesRouter.post("/transfer/:from/:to", async (req, res, next) => {
 // DELETE an envelope by envelopeId
 envelopesRouter.delete("/:envelopeId", async (req, res, next) => {
   try {
-    const deletedEnvelope = await deleteFromDatabaseById(
-      {
-        envelopeId: req.envelope.envelopeId,
-      },
-      "envelopes"
-    );
+    const deletedEnvelope = await deleteFromDatabaseById("envelopes", {
+      envelopeId: req.envelope.envelopeId,
+    });
     return res.status(204).send();
   } catch (error) {
     next(error);
@@ -168,17 +158,18 @@ envelopesRouter.delete("/:envelopeId", async (req, res, next) => {
 });
 
 // DELETE all envelopes
-envelopesRouter.delete("/", async (req, res, next) => {
+envelopesRouter.delete("/", auth, async (req, res, next) => {
   try {
-    // In router.delete, passing an argument to the middleware next() will not stop the execution of the code followed it.
-    const deletedEnvelopes = await deleteAllFromDatabase("envelopes");
+    const deletedEnvelopes = await deleteAllFromDatabase(
+      "envelopes",
+      req.user._id
+    );
     if (deletedEnvelopes === 0) {
       const err = new Error(`No envelope(s) to delete`);
       err.status = 400;
-      next(err);
-    } else {
-      res.status(204).send();
+      return next(err);
     }
+    res.status(204).send();
   } catch (error) {
     next(error);
   }

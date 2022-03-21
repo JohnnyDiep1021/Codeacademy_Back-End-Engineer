@@ -1,9 +1,13 @@
 const Envelope = require("../db/model/envelope");
+const User = require("../db/model/user");
+const lodash = require("lodash");
 
 const findDatabaseByName = function (name) {
   switch (name) {
     case "envelopes":
       return Envelope;
+    case "users":
+      return User;
     default:
       return null;
   }
@@ -14,29 +18,47 @@ const generateRandomInt = function (max) {
 };
 const createRandomId = function (max) {
   let id = "";
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 6; i++) {
     id += generateRandomInt(max);
   }
   return id;
 };
 
-const getAllFromDatabase = async function (modelType) {
+const getAllFromDatabase = async function (modelType, ownerId = "") {
   try {
     const model = findDatabaseByName(modelType);
     if (!model) throw new Error(`Invalid database model!`);
-    return await model.find({});
+
+    // return statement in switch statement works exactly like if/else statement => no need for break statement
+    switch (modelType) {
+      case "envelopes":
+        if (!ownerId) return null;
+        return await model.find({ owner: ownerId });
+      default:
+        return await model.find({});
+    }
   } catch (error) {
     throw error;
   }
 };
 
-const getFromDatabaseById = async function (modelType, id) {
+const getFromDatabaseById = async function (
+  modelType,
+  id,
+  ownerId = undefined
+) {
   try {
     const model = findDatabaseByName(modelType);
     if (!model) throw new Error(`Invalid database model!`);
+
     // const data = await model.findOne({ envelopeId: id });
-    const data = await model.findOne(id);
-    return data;
+    switch (modelType) {
+      case "envelopes":
+        if (!ownerId) return null;
+        return await model.findOne({ ...id, owner: ownerId });
+      default:
+        return await model.findOne(id);
+    }
   } catch (error) {
     throw error;
   }
@@ -48,28 +70,71 @@ const getFromDatabaseById = async function (modelType, id) {
  * @param {object} instance
  * @returns a promise
  */
-const addToDatabase = async function (modelType, instance) {
+const addToDatabase = async function (
+  modelType,
+  instance,
+  ownerId = "",
+  idName = "Id"
+) {
   try {
     const model = findDatabaseByName(modelType);
     if (!model) throw new Error(`Invalid database model!`);
-    instance.envelopeId = createRandomId(9);
-    const data = new model(instance);
+
+    const id = modelType.slice(0, modelType.length - 1) + "Id";
+    instance[id] = createRandomId(9);
+
+    let data;
+    // if (modelType === "envelopes" && ownerId) {
+    //   data = new model({ ...instance, owner: ownerId });
+    // }
+    switch (modelType) {
+      case "envelopes":
+        if (ownerId) {
+          data = new model({ ...instance, owner: ownerId });
+          break;
+        }
+      default:
+        data = new model(instance);
+    }
     await data.save();
+
+    if (modelType === "users") {
+      const token = await data.generateAuthToken();
+      return { data, token };
+    }
     return data;
   } catch (error) {
     throw error;
   }
 };
 
-const updateInstanceInDatabase = async function (modelType, instance, id) {
+const updateInstanceInDatabase = async function (
+  modelType,
+  instance,
+  id = undefined,
+  ownerId = undefined,
+  data = undefined
+) {
   try {
     const model = findDatabaseByName(modelType);
     if (!model) throw new Error(`Invalid database model!`);
 
-    const data = await model.findOne(id);
-    // const data = await getFromDatabaseById(modelType, id);
-    if (!data) return null;
+    // find existing data if no argument is passed to data param
+    if (!data) data = await model.findOne(id);
 
+    // if no data is found, return null
+    if (!data) {
+      const err = new Error("No data was found!");
+      err.status = 404;
+      throw err;
+    }
+
+    // throw err when get no new data to update
+    if (lodash.isEmpty(instance)) {
+      const err = new Error("Please, provide new information to update");
+      err.status = 400;
+      throw err;
+    }
     const updates = Object.keys(instance);
     // console.log(updates);
 
@@ -92,16 +157,24 @@ const updateInstanceInDatabase = async function (modelType, instance, id) {
 const transferBudget = async function (
   { from: fromId, to: toId } = {},
   { amount } = { amount: 0 },
+  ownerId = undefined,
   modelType = "envelopes"
 ) {
   try {
     const model = findDatabaseByName(modelType);
     if (!model) throw new Error(`Invalid database model!`);
 
-    if (!fromId || !toId) return null;
+    if (!fromId || !toId) {
+      const err = new Error(`Inadequate information to transfer money`);
+      err.status(400);
+      throw err;
+    }
 
-    const fromEnvId = await model.findOne({ envelopeId: fromId });
-    const toEnvId = await model.findOne({ envelopeId: toId });
+    const fromEnvId = await model.findOne({
+      envelopeId: fromId,
+      owner: ownerId,
+    });
+    const toEnvId = await model.findOne({ envelopeId: toId, owner: ownerId });
     if (!fromEnvId || !toEnvId) return { error: "Invalid envelope Id!" };
 
     if (amount < 0) throw new Error("Positive numbers are required!");
@@ -119,7 +192,7 @@ const transferBudget = async function (
   }
 };
 
-const deleteFromDatabaseById = async function (id, modelType) {
+const deleteFromDatabaseById = async function (modelType, id) {
   try {
     const model = findDatabaseByName(modelType);
     if (!model) throw new Error(`Invalid database model`);
@@ -131,12 +204,21 @@ const deleteFromDatabaseById = async function (id, modelType) {
   }
 };
 
-const deleteAllFromDatabase = async function (modelType) {
+const deleteAllFromDatabase = async function (modelType, ownerId = undefined) {
   try {
     const model = findDatabaseByName(modelType);
     if (!model) throw new Error(`Invalid database model!`);
-
-    const deleteResult = await model.deleteMany();
+    let deleteResult = {
+      deletedCount: 0,
+    };
+    switch (modelType) {
+      case "envelopes":
+        if (!ownerId) return deleteResult.deletedCount;
+        deleteResult = await model.deleteMany({ owner: ownerId });
+        break;
+      default:
+        deleteResult = await model.deleteMany();
+    }
     return deleteResult.deletedCount;
   } catch (error) {
     throw error;
