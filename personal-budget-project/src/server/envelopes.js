@@ -27,14 +27,15 @@ const {
 const { type, append } = require("express/lib/response");
 const { reset } = require("nodemon");
 
-// This will run before router.use()
+// router.param() will run before router.use()
 // METHOD-1 => using router.param() cannot accept auth middleware function => fail to authenticate user
 // envelopesRouter.param("envelopeId", async (req, res, next, envelopeId) => {})
 
 // METHOD-2 => using router.use() will be more efficient coz it can perform authentication by using auth middleware function for every route handler with "/:envelopeId"
-// envelopesRouter.use("/:envelopeId", auth, async (req, res, next) => { }
+
 // envelopesRouter.use(/\/\:envelopeId$/, auth, async (req, res, next) => { }
-envelopesRouter.use("/:envelopeId$/", auth, async (req, res, next) => {
+// $ will mark the end of an URL endpoint and this app.use will only get applied for any path which terminates with the envelopeId  => make the other paths which do not end with envelopeId still work.
+envelopesRouter.use("/:envelopeId$", auth, async (req, res, next) => {
   // next() middleware will not stop the execution of the code following it, use return next() instead
   try {
     console.log(req.params);
