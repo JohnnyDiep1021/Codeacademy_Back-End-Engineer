@@ -73,7 +73,7 @@ usersRouter.get("/me", auth, async (req, res, next) => {
 });
 
 // UPDATE user profile
-usersRouter.put("/me", auth, async (req, res, next) => {
+usersRouter.patch("/me", auth, async (req, res, next) => {
   try {
     const updatedUser = await updateInstanceInDatabase(
       "users",

@@ -64,18 +64,35 @@ const getFromDatabaseById = async function (
   }
 };
 
+const isBalanceEnough = function (amount = 0, balance) {
+  try {
+    // console.log(amount, balance);
+    if (amount > balance) return false;
+    return true;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateBalance = async function (amount = 0, id, modelType = "users") {
+  try {
+    const model = findDatabaseByName(modelType);
+    if (!model) throw new Error(`Invalid database model!`);
+
+    const user = await model.findById(id);
+    user.balance = user.balance - amount;
+    await user.save();
+  } catch (error) {
+    throw error;
+  }
+};
 /**
  *
  * @param {string} modelType
  * @param {object} instance
  * @returns a promise
  */
-const addToDatabase = async function (
-  modelType,
-  instance,
-  ownerId = "",
-  idName = "Id"
-) {
+const addToDatabase = async function (modelType, instance, ownerId = "") {
   try {
     const model = findDatabaseByName(modelType);
     if (!model) throw new Error(`Invalid database model!`);
@@ -90,6 +107,8 @@ const addToDatabase = async function (
     switch (modelType) {
       case "envelopes":
         if (ownerId) {
+          updateBalance(instance.budget, ownerId);
+          console.log(instance.budget);
           data = new model({ ...instance, owner: ownerId });
           break;
         }
@@ -146,7 +165,19 @@ const updateInstanceInDatabase = async function (
     );
     if (!isValidUpdate) return { error: `Invalid updates!` };
 
-    updates.forEach((update) => (data[update] = instance[update]));
+    switch (modelType) {
+      case "envelopes":
+        updateBalance(instance.budget, ownerId);
+        updates.forEach((update) => {
+          if (update === "budget")
+            data[update] = data[update] + instance[update];
+          else data[update] = instance[update];
+        });
+
+        break;
+      default:
+        updates.forEach((update) => (data[update] = instance[update]));
+    }
     await data.save();
     return instance;
   } catch (error) {
@@ -233,4 +264,5 @@ module.exports = {
   transferBudget,
   deleteFromDatabaseById,
   deleteAllFromDatabase,
+  isBalanceEnough,
 };

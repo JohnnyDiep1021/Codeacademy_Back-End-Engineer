@@ -12,13 +12,26 @@ const envelopesSchema = new mongoose.Schema(
     budget: {
       type: Number,
       default: 0,
-      required: true,
+      // required: true,
       validate(val) {
         if (val < 0) {
           throw new Error(`Budget must be a positive number`);
         }
       },
     },
+    notes: [
+      {
+        note: {
+          type: String,
+          default: "",
+          validate(val) {
+            if (val.length > 65) {
+              throw new Error(`Note contain only 65 characters`);
+            }
+          },
+        },
+      },
+    ],
     envelopeId: {
       type: String,
     },

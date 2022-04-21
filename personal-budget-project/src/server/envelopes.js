@@ -23,9 +23,9 @@ const {
   deleteFromDatabaseById,
   deleteAllFromDatabase,
   transferBudget,
+  isBalanceEnough,
 } = require("./utils");
-const { type, append } = require("express/lib/response");
-const { reset } = require("nodemon");
+const User = require("../db/model/user");
 
 // router.param() will run before router.use()
 // METHOD-1 => using router.param() cannot accept auth middleware function => fail to authenticate user
@@ -34,7 +34,7 @@ const { reset } = require("nodemon");
 // METHOD-2 => using router.use() will be more efficient coz it can perform authentication by using auth middleware function for every route handler with "/:envelopeId"
 
 // envelopesRouter.use(/\/\:envelopeId$/, auth, async (req, res, next) => { }
-// $ will mark the end of an URL endpoint and this app.use will only get applied for any path which terminates with the envelopeId  => make the other paths which do not end with envelopeId still work.
+// $ will mark the end of an URL endpoint and this app.use will only get applied for any path which terminates with the envelopeId  => the other paths which do not end with envelopeId still work.
 envelopesRouter.use("/:envelopeId$", auth, async (req, res, next) => {
   // next() middleware will not stop the execution of the code following it, use return next() instead
   try {
@@ -44,11 +44,11 @@ envelopesRouter.use("/:envelopeId$", auth, async (req, res, next) => {
       { envelopeId: req.params.envelopeId },
       req.user._id
     );
-    // console.log(envelope);
     if (!envelope) {
       const err = new Error("Cannot find envelope with the provided Id");
       err.status = 404;
-      return next(err);
+      throw err;
+      // return next(err);
       // return res.status(404).send()
     }
     req.envelope = envelope;
@@ -61,6 +61,11 @@ envelopesRouter.use("/:envelopeId$", auth, async (req, res, next) => {
 // POST/CREATE new envelope
 envelopesRouter.post("/", auth, async (req, res, next) => {
   try {
+    if (!isBalanceEnough(req.body.budget, req.user.balance))
+      throw new Error(
+        "Balance is inadequate to deposit money into the envelope"
+      );
+
     const newEnvelope = await addToDatabase(
       "envelopes",
       req.body,
@@ -69,9 +74,9 @@ envelopesRouter.post("/", auth, async (req, res, next) => {
     console.log("Envelope added!", newEnvelope);
     res.status(201).send(newEnvelope);
   } catch (error) {
-    console.log(error);
     error.status = 400;
-    error.message = "Missing requisite information to create a new envelope";
+    error.message =
+      error.message || "Missing requisite information to create a new envelope";
     next(error);
     // res.status(400).send(error);
   }
@@ -104,8 +109,15 @@ envelopesRouter.get("/:envelopeId", async (req, res, next) => {
 });
 
 // PUT/PATCH/UPDATE envelope by Id
-envelopesRouter.put("/:envelopeId", async (req, res, next) => {
+envelopesRouter.patch("/:envelopeId", async (req, res, next) => {
   try {
+    if (!isBalanceEnough(req.body.budget, req.user.balance)) {
+      const err = Error(
+        "Balance is inadequate to deposit money into the envelope"
+      );
+      err.status = 400;
+      throw err;
+    }
     const updatedEnvelope = await updateInstanceInDatabase(
       "envelopes",
       req.body,
@@ -175,6 +187,8 @@ envelopesRouter.delete("/", auth, async (req, res, next) => {
     next(error);
   }
 });
+
+// error-handler middleware
 envelopesRouter.use((err, req, res, next) => {
   const status = err.status || 500;
   res.status(status).send(err.message);
