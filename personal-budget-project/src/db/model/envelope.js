@@ -25,8 +25,8 @@ const envelopesSchema = new mongoose.Schema(
           type: String,
           default: "",
           validate(val) {
-            if (val.length > 65) {
-              throw new Error(`Note contain only 65 characters`);
+            if (val.length > 33) {
+              throw new Error(`A note contains only 33 characters`);
             }
           },
         },

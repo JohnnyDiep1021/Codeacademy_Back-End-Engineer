@@ -28,6 +28,11 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
+    expertise: {
+      type: String,
+      trim: true,
+      uppercase: true,
+    },
     password: {
       type: String,
       minLength: 6,
