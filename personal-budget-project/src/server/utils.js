@@ -74,15 +74,49 @@ const isBalanceEnough = function (amount = 0, balance) {
   }
 };
 
-const updateBalance = async function (amount = 0, id, modelType = "users") {
+const updateBalance = async function (
+  amount = 0,
+  id,
+  method = "",
+  budget = 0,
+  modelType = "users"
+) {
   try {
     const model = findDatabaseByName(modelType);
     if (!model) throw new Error(`Invalid database model!`);
 
     const user = await model.findById(id);
-    user.balance = user.balance - amount;
+    switch (method) {
+      case "CREATE":
+        if (isBalanceEnough(amount, user.balance)) user.balance -= amount;
+        else throw new Error("Balance is inadequate to deposit money");
+        break;
+      case "UPDATE":
+        if (amount <= user.balance) {
+          // console.log(amount, user.balance, budget);
+          // console.log(`Cont 1...`);
+          user.balance = user.balance + (budget - amount);
+          // console.log(user.balance);
+        } // else if (amount > user.balance) {
+        //   // console.log(amount - budget);
+        //   if (isBalanceEnough(amount - budget, user.balance))
+        //     user.balance = user.balance - (amount - budget);
+        //   else throw new Error("Balance is inadequate to update budget");
+        // }
+        else {
+          if (isBalanceEnough(amount - budget, user.balance))
+            user.balance = user.balance - (amount - budget);
+          else throw new Error("Balance is inadequate to update budget");
+        }
+
+        break;
+      default:
+    }
     await user.save();
+    return true;
   } catch (error) {
+    error.status = error.status || 400;
+    console.log(error.message);
     throw error;
   }
 };
@@ -107,8 +141,7 @@ const addToDatabase = async function (modelType, instance, ownerId = "") {
     switch (modelType) {
       case "envelopes":
         if (ownerId) {
-          updateBalance(instance.budget, ownerId);
-          console.log(instance.budget);
+          await updateBalance(instance.budget, ownerId, "CREATE");
           data = new model({ ...instance, owner: ownerId });
           break;
         }
@@ -165,15 +198,22 @@ const updateInstanceInDatabase = async function (
     );
     if (!isValidUpdate) return { error: `Invalid updates!` };
 
+    let isBalanceUpdated;
+
     switch (modelType) {
       case "envelopes":
-        updateBalance(instance.budget, ownerId);
+        isBalanceUpdated = await updateBalance(
+          instance["budget"],
+          ownerId,
+          "UPDATE",
+          data["budget"]
+        );
         updates.forEach((update) => {
-          if (update === "budget")
-            data[update] = data[update] + instance[update];
-          else data[update] = instance[update];
+          if (update === "budget" && isBalanceUpdated) {
+            console.log("Budget is updated...");
+            data[update] = instance[update];
+          } else data[update] = instance[update];
         });
-
         break;
       default:
         updates.forEach((update) => (data[update] = instance[update]));

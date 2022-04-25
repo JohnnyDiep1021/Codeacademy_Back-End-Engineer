@@ -61,10 +61,10 @@ envelopesRouter.use("/:envelopeId$", auth, async (req, res, next) => {
 // POST/CREATE new envelope
 envelopesRouter.post("/", auth, async (req, res, next) => {
   try {
-    if (!isBalanceEnough(req.body.budget, req.user.balance))
-      throw new Error(
-        "Balance is inadequate to deposit money into the envelope"
-      );
+    // if (!isBalanceEnough(req.body.budget, req.user.balance))
+    //   throw new Error(
+    //     "Balance is inadequate to deposit money into the envelope"
+    //   );
 
     const newEnvelope = await addToDatabase(
       "envelopes",
@@ -111,13 +111,13 @@ envelopesRouter.get("/:envelopeId", async (req, res, next) => {
 // PUT/PATCH/UPDATE envelope by Id
 envelopesRouter.patch("/:envelopeId", async (req, res, next) => {
   try {
-    if (!isBalanceEnough(req.body.budget, req.user.balance)) {
-      const err = Error(
-        "Balance is inadequate to deposit money into the envelope"
-      );
-      err.status = 400;
-      throw err;
-    }
+    // if (!isBalanceEnough(req.body.budget, req.user.balance)) {
+    //   const err = Error(
+    //     "Balance is inadequate to deposit money into the envelope"
+    //   );
+    //   err.status = 400;
+    //   throw err;
+    // }
     const updatedEnvelope = await updateInstanceInDatabase(
       "envelopes",
       req.body,
