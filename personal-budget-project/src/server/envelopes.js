@@ -161,10 +161,12 @@ envelopesRouter.post("/transfer/:from/:to", auth, async (req, res, next) => {
 // DELETE an envelope by envelopeId
 envelopesRouter.delete("/:envelopeId", async (req, res, next) => {
   try {
-    const deletedEnvelope = await deleteFromDatabaseById("envelopes", {
-      envelopeId: req.envelope.envelopeId,
-    });
-    return res.status(204).send();
+    const deletedEnvelope = await deleteFromDatabaseById(
+      "envelopes",
+      req.envelope
+    );
+    // return res.status(204).send(); // 204 => there is no content to send for this request
+    return res.status().send("Delete successfully!");
   } catch (error) {
     next(error);
   }

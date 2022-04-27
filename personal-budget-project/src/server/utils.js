@@ -76,7 +76,7 @@ const isBalanceEnough = function (amount = 0, balance) {
 
 const updateBalance = async function (
   amount = 0,
-  id,
+  id = "",
   method = "",
   budget = 0,
   modelType = "users"
@@ -93,22 +93,15 @@ const updateBalance = async function (
         break;
       case "UPDATE":
         if (amount <= user.balance) {
-          // console.log(amount, user.balance, budget);
-          // console.log(`Cont 1...`);
           user.balance = user.balance + (budget - amount);
-          // console.log(user.balance);
-        } // else if (amount > user.balance) {
-        //   // console.log(amount - budget);
-        //   if (isBalanceEnough(amount - budget, user.balance))
-        //     user.balance = user.balance - (amount - budget);
-        //   else throw new Error("Balance is inadequate to update budget");
-        // }
-        else {
+        } else {
           if (isBalanceEnough(amount - budget, user.balance))
             user.balance = user.balance - (amount - budget);
           else throw new Error("Balance is inadequate to update budget");
         }
-
+        break;
+      case "DELETE":
+        user.balance += budget;
         break;
       default:
     }
@@ -263,14 +256,21 @@ const transferBudget = async function (
   }
 };
 
-const deleteFromDatabaseById = async function (modelType, id) {
+const deleteFromDatabaseById = async function (modelType, instance) {
   try {
     const model = findDatabaseByName(modelType);
     if (!model) throw new Error(`Invalid database model`);
 
-    const deleteResult = await model.deleteOne(id);
+    const deleteResult = await model.deleteOne({
+      envelopeId: instance.envelopeId,
+    });
+    if (deleteResult.deletedCount)
+      await updateBalance(0, instance.owner, "DELETE", instance.budget);
+
+    // console.log(deleteResult);
     return deleteResult.deletedCount;
   } catch (error) {
+    console.log(error);
     throw error;
   }
 };
@@ -279,17 +279,26 @@ const deleteAllFromDatabase = async function (modelType, ownerId = undefined) {
   try {
     const model = findDatabaseByName(modelType);
     if (!model) throw new Error(`Invalid database model!`);
-    let deleteResult = {
-      deletedCount: 0,
-    };
+
+    let deleteResult;
+
     switch (modelType) {
       case "envelopes":
-        if (!ownerId) return deleteResult.deletedCount;
+        if (!ownerId) throw new Error("Please, provided ownerId to continue");
+        const envelopes = await model.find({ owner: ownerId });
+        const totalBudget = envelopes
+          .map((envelope) => envelope.budget)
+          .reduce((prev, curr) => prev + curr, 0);
+
         deleteResult = await model.deleteMany({ owner: ownerId });
+        if (deleteResult.deletedCount)
+          await updateBalance(0, ownerId, "DELETE", totalBudget);
         break;
       default:
         deleteResult = await model.deleteMany();
     }
+
+    console.log(deleteResult);
     return deleteResult.deletedCount;
   } catch (error) {
     throw error;
