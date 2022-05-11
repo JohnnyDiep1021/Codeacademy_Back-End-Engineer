@@ -72,7 +72,7 @@ envelopesRouter.post("/", auth, async (req, res, next) => {
       req.user._id
     );
     console.log("Envelope added!", newEnvelope);
-    res.status(201).send(newEnvelope);
+    res.status(201).json({ envelope: newEnvelope.toObject({ getters: true }) });
   } catch (error) {
     error.status = 400;
     error.message =
@@ -88,10 +88,10 @@ envelopesRouter.get("/", auth, async (req, res, next) => {
     const data = await getAllFromDatabase("envelopes", req.user._id);
     if (!data) {
       const err = new Error(`No data was found!`);
-      err.status = 404;
+      // err.status = 404;
       throw err;
     }
-    res.send(data);
+    res.json({ envelopes: data.map((ele) => ele.toObject({ getters: true })) });
   } catch (error) {
     next(error);
     // res.status(500).send(error);
@@ -101,7 +101,7 @@ envelopesRouter.get("/", auth, async (req, res, next) => {
 // GET/READ envelope by Id
 envelopesRouter.get("/:envelopeId", async (req, res, next) => {
   try {
-    res.send(req.envelope);
+    res.json({ envelope: req.envelope.toObject({ getters: true }) });
   } catch (error) {
     next(error);
     // res.status(500).send(error);
@@ -132,7 +132,7 @@ envelopesRouter.patch("/:envelopeId", async (req, res, next) => {
       return next(err);
       // return res.status(400).send(updatedEnvelope.error);
     }
-    res.send(updatedEnvelope);
+    res.json({ envelope: updatedEnvelope });
   } catch (error) {
     next(error);
     // res.status(500).send(error);
@@ -151,7 +151,7 @@ envelopesRouter.post("/transfer/:from/:to", auth, async (req, res, next) => {
       return next(err);
       // return res.status(404).send(transfer.error)
     }
-    res.send({ message: "Transfer budget successfully!" });
+    res.json({ message: "Transfer budget successfully!" });
   } catch (error) {
     next(error);
     // res.status(500).send();
@@ -165,8 +165,8 @@ envelopesRouter.delete("/:envelopeId", async (req, res, next) => {
       "envelopes",
       req.envelope
     );
-    // return res.status(204).send(); // 204 => there is no content to send for this request
-    return res.status().send("Delete successfully!");
+    // return res.status(204).send(); // normally, 204 is status code for delete operation  => there is no content to send for this request
+    return res.status(200).json({ message: "Delete envelope successfully!" });
   } catch (error) {
     next(error);
   }
@@ -184,7 +184,7 @@ envelopesRouter.delete("/", auth, async (req, res, next) => {
       err.status = 400;
       return next(err);
     }
-    res.status(204).send();
+    res.status(200).json({ message: "Delete all envelopes successfully!" });
   } catch (error) {
     next(error);
   }
@@ -193,7 +193,7 @@ envelopesRouter.delete("/", auth, async (req, res, next) => {
 // error-handler middleware
 envelopesRouter.use((err, req, res, next) => {
   const status = err.status || 500;
-  res.status(status).send(err.message);
+  res.status(status).json({ message: err.message });
 });
 
 module.exports = envelopesRouter;

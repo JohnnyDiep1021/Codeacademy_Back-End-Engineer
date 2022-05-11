@@ -1,6 +1,7 @@
 const Envelope = require("../db/model/envelope");
 const User = require("../db/model/user");
 const lodash = require("lodash");
+const mongoose = require("mongoose");
 
 const findDatabaseByName = function (name) {
   switch (name) {
@@ -51,6 +52,7 @@ const getFromDatabaseById = async function (
     const model = findDatabaseByName(modelType);
     if (!model) throw new Error(`Invalid database model!`);
 
+    console.log(id);
     // const data = await model.findOne({ envelopeId: id });
     switch (modelType) {
       case "envelopes":
@@ -136,8 +138,30 @@ const addToDatabase = async function (modelType, instance, ownerId = "") {
         if (ownerId) {
           await updateBalance(instance.budget, ownerId, "CREATE");
           data = new model({ ...instance, owner: ownerId });
-          break;
+          const user = await User.findById(ownerId);
+          // const sess = await mongoose.startSession();
+          // sess.startTransaction();
+          // await data.save({ session: sess });
+          user.envelopes.push(data);
+          await user.save();
+          // await sess.commitTransaction();
+          // return data;
         }
+        break;
+      case "users":
+        const { email, username } = instance;
+        const existingEmail = await model.findOne({ email });
+        const existingUsername = await model.findOne({
+          username,
+        });
+        if (existingEmail || existingUsername) {
+          const err = new Error(
+            `Username or email has existed. Please choose a new one!`
+          );
+          throw err;
+        }
+        data = new model({ ...instance, envelopes: [] });
+        break;
       default:
         data = new model(instance);
     }
@@ -149,6 +173,7 @@ const addToDatabase = async function (modelType, instance, ownerId = "") {
     }
     return data;
   } catch (error) {
+    console.log(error);
     throw error;
   }
 };
@@ -261,9 +286,25 @@ const deleteFromDatabaseById = async function (modelType, instance) {
     const model = findDatabaseByName(modelType);
     if (!model) throw new Error(`Invalid database model`);
 
-    const deleteResult = await model.deleteOne({
-      envelopeId: instance.envelopeId,
-    });
+    let deleteResult;
+    switch (modelType) {
+      case "envelopes":
+        // connect to user model's properties based on "ref" relationship
+        instance = await instance.populate("owner");
+
+        // pull/ remove the envelope id matching user
+        instance.owner.envelopes.pull(instance);
+        await instance.owner.save();
+        deleteResult = await model.deleteOne({
+          envelopeId: instance.envelopeId,
+        });
+        break;
+      default:
+        deleteResult = await model.deleteOne({
+          _id: instance._id,
+        });
+    }
+
     if (deleteResult.deletedCount)
       await updateBalance(0, instance.owner, "DELETE", instance.budget);
 
@@ -286,10 +327,15 @@ const deleteAllFromDatabase = async function (modelType, ownerId = undefined) {
       case "envelopes":
         if (!ownerId) throw new Error("Please, provided ownerId to continue");
         const envelopes = await model.find({ owner: ownerId });
+        // {}, [] => true
+        if (envelopes.length === 0)
+          throw new Error("Found no envelopes with provided ownerId");
+        const user = await User.findOne({ _id: ownerId });
+        user.envelopes = [];
         const totalBudget = envelopes
           .map((envelope) => envelope.budget)
           .reduce((prev, curr) => prev + curr, 0);
-
+        await user.save();
         deleteResult = await model.deleteMany({ owner: ownerId });
         if (deleteResult.deletedCount)
           await updateBalance(0, ownerId, "DELETE", totalBudget);

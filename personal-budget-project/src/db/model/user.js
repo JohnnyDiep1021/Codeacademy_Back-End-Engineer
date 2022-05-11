@@ -33,6 +33,9 @@ const userSchema = new mongoose.Schema(
       trim: true,
       uppercase: true,
     },
+    image: {
+      type: String,
+    },
     password: {
       type: String,
       minLength: 6,
@@ -50,6 +53,13 @@ const userSchema = new mongoose.Schema(
         if (val < 0) throw new Error(`Balance must be positive`);
       },
     },
+    envelopes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: "Envelopes",
+      },
+    ],
     tokens: [
       {
         token: {
@@ -63,12 +73,13 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-// Set up virtual property
-userSchema.virtual("envelopes", {
-  ref: "Envelopes",
-  localField: "_id",
-  foreignField: "owner",
-});
+// // Set up virtual property
+// userSchema.virtual("envelopes", {
+//   ref: "Envelopes",
+//   localField: "_id",
+//   foreignField: "owner",
+// });
+
 // define instance method
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
@@ -95,18 +106,18 @@ userSchema.statics.findByCredentials = async function ({
 } = {}) {
   try {
     if ((!email && !username) || !password) {
-      throw Error(`Email/username and password are required to login!`);
+      throw Error(`Email/ username and password are required to login!`);
     }
     let user;
     if (email) user = await User.findOne({ email });
     if (username) user = await User.findOne({ username });
     if (!user) {
-      throw Error(`Invalid email/username or password`);
+      throw Error(`Invalid email/ username or password`);
     }
 
     const isMatched = await bcrypt.compare(password, user.password);
     if (!isMatched) {
-      throw Error(`Invalid email/username or password`);
+      throw Error(`Invalid email/ username or password`);
     }
 
     return user;
@@ -137,4 +148,5 @@ userSchema.pre("remove", async function (next) {
   next();
 });
 const User = mongoose.model("User", userSchema);
+
 module.exports = User;

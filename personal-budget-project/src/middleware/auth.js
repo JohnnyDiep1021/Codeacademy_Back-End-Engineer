@@ -11,7 +11,7 @@ const auth = async function (req, res, next) {
       _id: decoded._id,
       "tokens.token": token,
     });
-    if (!user) throw new Error(`error: Please authenticate`);
+    if (!user) throw new Error(`Please authenticate!`);
 
     req.user = user;
     req.token = token;

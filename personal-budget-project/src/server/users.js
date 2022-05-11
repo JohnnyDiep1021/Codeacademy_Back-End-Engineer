@@ -16,9 +16,9 @@ const {
 // POST/CREATE a new user - SIGNUP
 usersRouter.post("/signup", async (req, res, next) => {
   try {
-    const newUser = await addToDatabase("users", req.body);
-    console.log(`New user created!`, newUser);
-    res.status(201).send(newUser);
+    const user = await addToDatabase("users", req.body);
+    console.log(`Signing up successfully!`, user);
+    res.status(201).json({ user });
   } catch (error) {
     error.status = error.status || 400;
     next(error);
@@ -32,7 +32,7 @@ usersRouter.post("/login", async (req, res, next) => {
     const token = await user.generateAuthToken();
 
     // METHOD-2
-    res.send({ user, token });
+    res.json({ user, token });
   } catch (error) {
     error.status = 400;
     next(error);
@@ -46,7 +46,7 @@ usersRouter.post("/logout", auth, async (req, res, next) => {
       return token.token !== req.token;
     });
     await req.user.save();
-    res.send();
+    res.json({ message: "Logging out sucessfully!" });
   } catch (error) {
     next(error);
   }
@@ -57,7 +57,7 @@ usersRouter.post("/logoutAll", auth, async (req, res, next) => {
   try {
     req.user.tokens = [];
     await req.user.save();
-    res.send();
+    res.json({ message: "Logging out all devices sucessfully!" });
   } catch (error) {
     next(error);
   }
@@ -66,7 +66,17 @@ usersRouter.post("/logoutAll", auth, async (req, res, next) => {
 // GET/ READ user profile
 usersRouter.get("/me", auth, async (req, res, next) => {
   try {
-    res.send(req.user);
+    // console.log(typeof req.user);
+    // console.log(typeof req.user._id);
+    // console.log(typeof req.user.toObject({ getters: true }));
+    // console.log(typeof req.user.toObject({ getters: true })._id);
+
+    // get virtual property
+    // const userEnvelopes = await User.findById("627b2db242d4786f67f49d0c");
+    // await userEnvelopes.populate("envelopes");
+    // console.log(userEnvelopes.envelopes);
+
+    res.json({ user: req.user.toObject({ getters: true }) });
   } catch (error) {
     next(error);
   }
@@ -87,11 +97,12 @@ usersRouter.patch("/me", auth, async (req, res, next) => {
     if (updatedUser.error) {
       const err = new Error(updatedUser.error);
       err.status = 400;
-      return next(err);
+      // return next(err);
+      throw err;
     }
-    res.send(updatedUser);
+    res.json({ update: updatedUser });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     next(error);
   }
 });
@@ -103,13 +114,15 @@ usersRouter.delete("/me", auth, async (req, res, next) => {
 
     // METHOD-2
     await req.user.remove();
-    res.status(204).send();
+    res.json({ message: "Account deleted sucessfully!" });
   } catch (error) {
     next(error);
   }
 });
+
 usersRouter.use((err, req, res, next) => {
   const status = err.status || 500;
-  res.status(status).send(err.message);
+  res.status(status).json({ error: err.message });
 });
+
 module.exports = usersRouter;

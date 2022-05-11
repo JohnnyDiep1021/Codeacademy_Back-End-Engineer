@@ -34,6 +34,7 @@ const envelopesSchema = new mongoose.Schema(
     ],
     envelopeId: {
       type: String,
+      required: true,
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
