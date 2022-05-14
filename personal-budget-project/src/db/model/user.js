@@ -31,7 +31,6 @@ const userSchema = new mongoose.Schema(
     expertise: {
       type: String,
       trim: true,
-      uppercase: true,
     },
     image: {
       type: String,
@@ -135,6 +134,12 @@ userSchema.pre("save", async function (next) {
   const user = this;
   // console.log(user);
   // only create hashedPassword if new users are created or existing password is updated)
+
+  user.expertise = user.expertise
+    .split(" ")
+    .map((str) => str.charAt(0).toUpperCase() + str.slice(1))
+    .join(" ");
+
   if (user.isModified("password")) {
     user.password = await bcrypt.hash(user.password, 8);
   }
