@@ -28,13 +28,6 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
-    expertise: {
-      type: String,
-      trim: true,
-    },
-    image: {
-      type: String,
-    },
     password: {
       type: String,
       minLength: 6,
@@ -44,6 +37,29 @@ const userSchema = new mongoose.Schema(
         if (val.toLowerCase().includes("password"))
           throw new Error(`Password field cannot contain 'password'`);
       },
+    },
+    image: {
+      type: String,
+    },
+    expertise: {
+      type: String,
+      trim: true,
+    },
+    github: {
+      type: String,
+      trim: true,
+    },
+    linkedin: {
+      type: String,
+      trim: true,
+    },
+    whatsapp: {
+      type: String,
+      trim: true,
+    },
+    facebook: {
+      type: String,
+      trim: true,
     },
     balance: {
       type: Number,
@@ -135,10 +151,12 @@ userSchema.pre("save", async function (next) {
   // console.log(user);
   // only create hashedPassword if new users are created or existing password is updated)
 
-  user.expertise = user.expertise
-    .split(" ")
-    .map((str) => str.charAt(0).toUpperCase() + str.slice(1))
-    .join(" ");
+  if (user.expertise) {
+    user.expertise = user.expertise
+      .split(" ")
+      .map((str) => str.charAt(0).toUpperCase() + str.slice(1))
+      .join(" ");
+  }
 
   if (user.isModified("password")) {
     user.password = await bcrypt.hash(user.password, 8);

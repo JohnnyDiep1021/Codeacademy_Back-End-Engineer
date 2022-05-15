@@ -17,9 +17,13 @@ const {
 usersRouter.post("/signup", async (req, res, next) => {
   try {
     const user = await addToDatabase("users", req.body);
+    // const token = user.toObject({ getters: true }).tokens[0];
     console.log(`Signing up successfully!`, user);
-    res.status(201).json({ user });
+    res
+      .status(201)
+      .json({ user: user.data.toObject({ getters: true }), token: user.token });
   } catch (error) {
+    console.log(error);
     error.status = error.status || 400;
     next(error);
   }
@@ -32,7 +36,10 @@ usersRouter.post("/login", async (req, res, next) => {
     const token = await user.generateAuthToken();
 
     // METHOD-2
-    res.json({ user, token });
+    res.json({
+      user: user.toObject({ getters: true }),
+      token,
+    });
   } catch (error) {
     error.status = 400;
     next(error);
