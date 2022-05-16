@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+// const cors = require("cors");
 // require("./src/db/mongoose");
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -7,6 +8,7 @@ const PORT = process.env.PORT || 5000;
 // // Add middware for parsing request bodies here: (get request body object through req.body)
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
+// app.use(cors());
 
 app.use((req, res, next) => {
   // attach headers to the response
