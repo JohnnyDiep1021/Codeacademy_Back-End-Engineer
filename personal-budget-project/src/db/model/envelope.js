@@ -8,6 +8,8 @@ const envelopesSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: true,
+      default: "New title",
+      maxlength: 23,
     },
     budget: {
       type: Number,
@@ -24,9 +26,10 @@ const envelopesSchema = new mongoose.Schema(
         note: {
           type: String,
           default: "",
+          maxlength: 36,
           validate(val) {
-            if (val.length > 33) {
-              throw new Error(`A note contains only 33 characters`);
+            if (val.length > 36) {
+              throw new Error(`A note contains only 36 characters`);
             }
           },
         },

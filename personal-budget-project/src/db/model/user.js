@@ -9,12 +9,16 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: true,
+      minlength: 2,
+      maxlength: 46,
     },
     username: {
       type: String,
       unique: true,
       trim: true,
       required: true,
+      minlength: 6,
+      maxlength: 36,
     },
     email: {
       type: String,
@@ -22,6 +26,8 @@ const userSchema = new mongoose.Schema(
       required: true,
       lowercase: true,
       trim: true,
+      minlength: 3,
+      maxlength: 254,
       validate(val) {
         if (!validator.isEmail(val)) {
           throw new Error(`Email is invalid. Try again!`);
@@ -30,7 +36,7 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      minLength: 6,
+      minLength: 8,
       trim: true,
       required: true,
       validate(val) {
@@ -40,6 +46,7 @@ const userSchema = new mongoose.Schema(
     },
     image: {
       type: String,
+      trim: true,
     },
     expertise: {
       type: String,

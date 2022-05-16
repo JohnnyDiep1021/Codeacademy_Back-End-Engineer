@@ -136,16 +136,21 @@ const addToDatabase = async function (modelType, instance, ownerId = "") {
     switch (modelType) {
       case "envelopes":
         if (ownerId) {
-          await updateBalance(instance.budget, ownerId, "CREATE");
           data = new model({ ...instance, owner: ownerId });
+          // await updateBalance(instance.budget, ownerId, "CREATE");
           const user = await User.findById(ownerId);
-          // const sess = await mongoose.startSession();
-          // sess.startTransaction();
-          // await data.save({ session: sess });
+          // allow multi-operations on the databeas at the same time, but each operation is completely isolated.
+          // only if the new envelope is saved sucessfully in the database, the envelopeId will be added to the user
+          const sess = await mongoose.startSession();
+          sess.startTransaction();
+          await data.save({ session: sess });
           user.envelopes.push(data);
-          await user.save();
-          // await sess.commitTransaction();
-          // return data;
+          await user.save({ session: sess });
+          const responseStatus = await sess.commitTransaction();
+          if (responseStatus.ok) {
+            await updateBalance(instance.budget, ownerId, "CREATE");
+          }
+          return data;
         }
         break;
       case "users":
@@ -291,22 +296,21 @@ const deleteFromDatabaseById = async function (modelType, instance) {
       case "envelopes":
         // connect to user model's properties based on "ref" relationship
         instance = await instance.populate("owner");
-
+        const sess = await mongoose.startSession();
+        sess.startTransaction();
+        await instance.remove({ session: sess });
         // pull/ remove the envelope id matching user
         instance.owner.envelopes.pull(instance);
-        await instance.owner.save();
-        deleteResult = await model.deleteOne({
-          envelopeId: instance.envelopeId,
-        });
+        await instance.owner.save({ session: sess });
+        await sess.commitTransaction();
+        await updateBalance(0, instance.owner, "DELETE", instance.budget);
+        deleteResult = { deletedCount: 1 };
         break;
       default:
         deleteResult = await model.deleteOne({
           _id: instance._id,
         });
     }
-
-    if (deleteResult.deletedCount)
-      await updateBalance(0, instance.owner, "DELETE", instance.budget);
 
     // console.log(deleteResult);
     return deleteResult.deletedCount;
@@ -325,17 +329,17 @@ const deleteAllFromDatabase = async function (modelType, ownerId = undefined) {
 
     switch (modelType) {
       case "envelopes":
-        if (!ownerId) throw new Error("Please, provided ownerId to continue");
+        if (!ownerId) throw new Error("Please, provide ownerId to continue.");
         const envelopes = await model.find({ owner: ownerId });
         // {}, [] => true
         if (envelopes.length === 0)
-          throw new Error("Found no envelopes with provided ownerId");
+          throw new Error("Users has no envelopes to delete.");
         const user = await User.findOne({ _id: ownerId });
         user.envelopes = [];
+        await user.save();
         const totalBudget = envelopes
           .map((envelope) => envelope.budget)
           .reduce((prev, curr) => prev + curr, 0);
-        await user.save();
         deleteResult = await model.deleteMany({ owner: ownerId });
         if (deleteResult.deletedCount)
           await updateBalance(0, ownerId, "DELETE", totalBudget);

@@ -2,6 +2,7 @@ const usersRouter = require("express").Router();
 
 const lodash = require("lodash");
 const morgan = require("morgan");
+const { check, validationResult } = require("express-validator");
 
 usersRouter.use(morgan("dev"));
 
@@ -14,20 +15,37 @@ const {
 } = require("./utils");
 
 // POST/CREATE a new user - SIGNUP
-usersRouter.post("/signup", async (req, res, next) => {
-  try {
-    const user = await addToDatabase("users", req.body);
-    // const token = user.toObject({ getters: true }).tokens[0];
-    console.log(`Signing up successfully!`, user);
-    res
-      .status(201)
-      .json({ user: user.data.toObject({ getters: true }), token: user.token });
-  } catch (error) {
-    console.log(error);
-    error.status = error.status || 400;
-    next(error);
+usersRouter.post(
+  "/signup",
+  [
+    check("name").not().isEmpty(),
+    check("username").isLength({ min: 6 }),
+    check("email").not().isEmpty().isEmail(),
+    check("password").not().isEmpty().isStrongPassword(),
+  ],
+  async (req, res, next) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log(errors);
+        throw new Error(
+          `Invalid inputs passed! Please, check your data and try again.`
+        );
+      }
+      const user = await addToDatabase("users", req.body);
+      // const token = user.toObject({ getters: true }).tokens[0];
+      console.log(`Signing up successfully!`, user);
+      res.status(201).json({
+        user: user.data.toObject({ getters: true }),
+        token: user.token,
+      });
+    } catch (error) {
+      console.log(error);
+      error.status = error.status || 400;
+      next(error);
+    }
   }
-});
+);
 
 // LOGIN
 usersRouter.post("/login", async (req, res, next) => {

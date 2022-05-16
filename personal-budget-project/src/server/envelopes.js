@@ -4,6 +4,7 @@ const auth = require("../middleware/auth");
 // 3rd party module/lib
 const lodash = require("lodash");
 const morgan = require("morgan");
+const { check, validationResult } = require("express-validator");
 /*
 // http://expressjs.com/en/resources/middleware/errorhandler.html
 const errorhandler = require("errorhandler");
@@ -59,28 +60,46 @@ envelopesRouter.use("/:envelopeId$", auth, async (req, res, next) => {
 });
 
 // POST/CREATE new envelope
-envelopesRouter.post("/", auth, async (req, res, next) => {
-  try {
-    // if (!isBalanceEnough(req.body.budget, req.user.balance))
-    //   throw new Error(
-    //     "Balance is inadequate to deposit money into the envelope"
-    //   );
-
-    const newEnvelope = await addToDatabase(
-      "envelopes",
-      req.body,
-      req.user._id
-    );
-    console.log("Envelope added!", newEnvelope);
-    res.status(201).json({ envelope: newEnvelope.toObject({ getters: true }) });
-  } catch (error) {
-    error.status = 400;
-    error.message =
-      error.message || "Missing requisite information to create a new envelope";
-    next(error);
-    // res.status(400).send(error);
+envelopesRouter.post(
+  "/",
+  auth,
+  [
+    check("category").not().isEmpty(),
+    check("budget").isFloat({ min: 0 }),
+    check("notes").isArray({ max: 4 }),
+  ],
+  async (req, res, next) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        throw new Error(
+          `Invalid inputs passed for creating envelopes! Please try again.`
+        );
+      }
+      // if (!isBalanceEnough(req.body.budget, req.user.balance))
+      //   throw new Error(
+      //     "Balance is inadequate to deposit money into the envelope"
+      //   );
+      // console.log(req.body, typeof req.body);
+      const newEnvelope = await addToDatabase(
+        "envelopes",
+        req.body,
+        req.user._id
+      );
+      console.log("Envelope added!", newEnvelope);
+      res
+        .status(201)
+        .json({ envelope: newEnvelope.toObject({ getters: true }) });
+    } catch (error) {
+      error.status = 400;
+      error.message =
+        error.message ||
+        "Missing requisite information to create a new envelope";
+      next(error);
+      // res.status(400).send(error);
+    }
   }
-});
+);
 
 // GET/READ all envelopes
 envelopesRouter.get("/", auth, async (req, res, next) => {
@@ -99,7 +118,8 @@ envelopesRouter.get("/", auth, async (req, res, next) => {
 });
 
 // GET/READ envelope by Id
-envelopesRouter.get("/:envelopeId", async (req, res, next) => {
+envelopesRouter.get("/:envelopeId", auth, async (req, res, next) => {
+  // console.log(req.params);
   try {
     res.json({ envelope: req.envelope.toObject({ getters: true }) });
   } catch (error) {
@@ -109,54 +129,78 @@ envelopesRouter.get("/:envelopeId", async (req, res, next) => {
 });
 
 // PUT/PATCH/UPDATE envelope by Id
-envelopesRouter.patch("/:envelopeId", async (req, res, next) => {
-  try {
-    // if (!isBalanceEnough(req.body.budget, req.user.balance)) {
-    //   const err = Error(
-    //     "Balance is inadequate to deposit money into the envelope"
-    //   );
-    //   err.status = 400;
-    //   throw err;
-    // }
-    const updatedEnvelope = await updateInstanceInDatabase(
-      "envelopes",
-      req.body,
-      undefined,
-      req.user._id,
-      req.envelope
-    );
+envelopesRouter.patch(
+  "/:envelopeId",
+  [
+    check("category").not().isEmpty(),
+    check("budget").isFloat({ min: 0 }),
+    check("notes").isArray({ max: 4 }),
+  ],
+  async (req, res, next) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log(errors);
+        throw new Error(
+          `Invalid inputs passed for updating envelopes! Please try again!`
+        );
+      }
+      // if (!isBalanceEnough(req.body.budget, req.user.balance)) {
+      //   const err = Error(
+      //     "Balance is inadequate to deposit money into the envelope"
+      //   );
+      //   err.status = 400;
+      //   throw err;
+      // }
+      const updatedEnvelope = await updateInstanceInDatabase(
+        "envelopes",
+        req.body,
+        undefined,
+        req.user._id,
+        req.envelope
+      );
 
-    if (updatedEnvelope.error) {
-      const err = new Error(updatedEnvelope.error);
-      err.status = 400;
-      return next(err);
-      // return res.status(400).send(updatedEnvelope.error);
+      if (updatedEnvelope.error) {
+        const err = new Error(updatedEnvelope.error);
+        err.status = 400;
+        return next(err);
+        // return res.status(400).send(updatedEnvelope.error);
+      }
+      res.json({ envelope: updatedEnvelope });
+    } catch (error) {
+      next(error);
+      // res.status(500).send(error);
     }
-    res.json({ envelope: updatedEnvelope });
-  } catch (error) {
-    next(error);
-    // res.status(500).send(error);
   }
-});
+);
 
 // TRANSFER BUDGET
-envelopesRouter.post("/transfer/:from/:to", auth, async (req, res, next) => {
-  try {
-    console.log(req.params);
-    const transfer = await transferBudget(req.params, req.body, req.user._id);
+envelopesRouter.post(
+  "/transfer/:from/:to",
+  auth,
+  [check("amount").isFloat({ min: 0 })],
+  async (req, res, next) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        throw new Error(`Amount must be postive`);
+      }
+      console.log(req.params);
+      const transfer = await transferBudget(req.params, req.body, req.user._id);
 
-    if (transfer.error) {
-      const err = new Error(transfer.error);
-      err.status = 404;
-      return next(err);
-      // return res.status(404).send(transfer.error)
+      if (transfer.error) {
+        const err = new Error(transfer.error);
+        err.status = 404;
+        return next(err);
+        // return res.status(404).send(transfer.error)
+      }
+      res.json({ message: "Transfer budget successfully!" });
+    } catch (error) {
+      next(error);
+      // res.status(500).send();
     }
-    res.json({ message: "Transfer budget successfully!" });
-  } catch (error) {
-    next(error);
-    // res.status(500).send();
   }
-});
+);
 
 // DELETE an envelope by envelopeId
 envelopesRouter.delete("/:envelopeId", async (req, res, next) => {
@@ -193,7 +237,7 @@ envelopesRouter.delete("/", auth, async (req, res, next) => {
 // error-handler middleware
 envelopesRouter.use((err, req, res, next) => {
   const status = err.status || 500;
-  res.status(status).json({ message: err.message });
+  res.status(status).json({ error: err.message });
 });
 
 module.exports = envelopesRouter;
