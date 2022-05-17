@@ -1,10 +1,7 @@
 const usersRouter = require("express").Router();
 
-const lodash = require("lodash");
-const morgan = require("morgan");
 const { check, validationResult } = require("express-validator");
-
-usersRouter.use(morgan("dev"));
+const lodash = require("lodash");
 
 const auth = require("../middleware/auth");
 const User = require("../db/model/user");

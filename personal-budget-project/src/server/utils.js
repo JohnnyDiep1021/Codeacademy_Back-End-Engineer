@@ -52,7 +52,6 @@ const getFromDatabaseById = async function (
     const model = findDatabaseByName(modelType);
     if (!model) throw new Error(`Invalid database model!`);
 
-    console.log(id);
     // const data = await model.findOne({ envelopeId: id });
     switch (modelType) {
       case "envelopes":

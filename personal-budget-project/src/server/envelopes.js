@@ -2,9 +2,8 @@ const envelopesRouter = require("express").Router();
 const auth = require("../middleware/auth");
 
 // 3rd party module/lib
-const lodash = require("lodash");
-const morgan = require("morgan");
 const { check, validationResult } = require("express-validator");
+const lodash = require("lodash");
 /*
 // http://expressjs.com/en/resources/middleware/errorhandler.html
 const errorhandler = require("errorhandler");
@@ -13,7 +12,6 @@ if (process.env.NODE_ENV === "development") {
   envelopesRouter.use(errorhandler({ log: false }));
 }
 */
-envelopesRouter.use(morgan("dev"));
 
 const Envelope = require("../db/model/envelope");
 const {
@@ -39,7 +37,6 @@ const User = require("../db/model/user");
 envelopesRouter.use("/:envelopeId$", auth, async (req, res, next) => {
   // next() middleware will not stop the execution of the code following it, use return next() instead
   try {
-    console.log(req.params);
     const envelope = await getFromDatabaseById(
       "envelopes",
       { envelopeId: req.params.envelopeId },
@@ -180,6 +177,7 @@ envelopesRouter.post(
   auth,
   [check("amount").isFloat({ min: 0 })],
   async (req, res, next) => {
+    console.log(req.body);
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
