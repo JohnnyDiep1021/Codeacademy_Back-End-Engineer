@@ -237,6 +237,13 @@ const updateInstanceInDatabase = async function (
           } else data[update] = instance[update];
         });
         break;
+      case "users":
+        updates.forEach((update) => {
+          if (update === "balance") {
+            data[update] += instance[update];
+          } else data[update] = instance[update];
+        });
+        break;
       default:
         updates.forEach((update) => (data[update] = instance[update]));
     }

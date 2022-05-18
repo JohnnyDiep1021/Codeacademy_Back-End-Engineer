@@ -130,7 +130,7 @@ envelopesRouter.patch(
   "/:envelopeId",
   [
     check("category").not().isEmpty(),
-    check("budget").isFloat({ min: 0 }),
+    check("budget").isNumeric({ min: 0 }),
     check("notes").isArray({ max: 4 }),
   ],
   async (req, res, next) => {

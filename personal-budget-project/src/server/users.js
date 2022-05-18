@@ -3,6 +3,7 @@ const usersRouter = require("express").Router();
 const { check, validationResult } = require("express-validator");
 const lodash = require("lodash");
 
+const fileUpload = require("../middleware/file-upload");
 const auth = require("../middleware/auth");
 const User = require("../db/model/user");
 const {

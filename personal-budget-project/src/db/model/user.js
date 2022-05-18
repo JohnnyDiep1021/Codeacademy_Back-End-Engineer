@@ -172,6 +172,9 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+// userSchema.pre("get", async function (next) {
+//   next();
+// });
 // Delete user envelopes when user is removed
 userSchema.pre("remove", async function (next) {
   const user = this;
