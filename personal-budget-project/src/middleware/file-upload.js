@@ -9,12 +9,14 @@ const MINE_TYPE_MAP = {
 };
 // an obj with a bunch of pre-configured middlewares
 const fileUpload = multer({
-  // provide storage and limited image size
+  // provide storage and limited image size in bytes
   limits: 500000,
   storage: multer.diskStorage({
+    // control the destination where the file is stored
     destination: (req, file, cb) => {
-      cb(null, "uploads/images");
+      cb(null, "src/uploads/images");
     },
+    // control the file name being used
     filename: (req, file, cb) => {
       //get the extension
       const ext = MINE_TYPE_MAP[file.mimetype];

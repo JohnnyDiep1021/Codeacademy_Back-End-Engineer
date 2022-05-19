@@ -1,8 +1,13 @@
+const fs = require("fs");
+const path = require("path");
+
 const express = require("express");
 const mongoose = require("mongoose");
 // require("./src/db/mongoose");
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// front-end code can be intentionally broken/ used/ modified by the users => add validation to back-end for the inputs!
 
 // // // cors must be set at the very beginning of the project
 // // // Working with Cross Origin Resource Sharing
@@ -30,12 +35,35 @@ app.use(cors());
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
+// middleware to handle image url
+// express.static() => just return a file from an absolute path
+app.use(
+  "/src/uploads/images",
+  // when the app get requested based on the defined path, it will simply return an image file from src/uploads/images
+  express.static(path.join("src/uploads", "images"))
+);
+
 const morgan = require("morgan");
 app.use(morgan("dev"));
 
 const apiRouter = require("./src/server/api");
 app.use("/api", apiRouter);
 
+app.use((err, req, res, next) => {
+  if (req.file) {
+    // delete uploaded image  file in local folder if an error occur
+    fs.unlink(req.file.path, (err) => {
+      console.log(err);
+    });
+  }
+  if (res.headerSent) {
+    return next(err);
+  }
+  const status = err.status || 500;
+  res
+    .status(status)
+    .json({ error: err.message || `An unknown error occurred` });
+});
 mongoose
   .connect(
     "mongodb+srv://taskapp:Fairytailmeothui2001@cluster0.2lb1a.mongodb.net/personal-budget-api?retryWrites=true&w=majority"

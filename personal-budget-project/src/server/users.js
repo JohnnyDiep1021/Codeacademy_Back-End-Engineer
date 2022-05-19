@@ -1,5 +1,6 @@
-const usersRouter = require("express").Router();
+const fs = require("fs");
 
+const usersRouter = require("express").Router();
 const { check, validationResult } = require("express-validator");
 const lodash = require("lodash");
 
@@ -17,7 +18,7 @@ usersRouter.post(
   "/signup",
   [
     check("name").not().isEmpty(),
-    check("username").isLength({ min: 6 }),
+    check("username").isLength({ min: 6, max: 36 }),
     check("email").not().isEmpty().isEmail(),
     check("password").not().isEmpty().isStrongPassword(),
   ],
@@ -106,8 +107,60 @@ usersRouter.get("/me", auth, async (req, res, next) => {
 });
 
 // UPDATE user profile
-usersRouter.patch("/me", auth, async (req, res, next) => {
+usersRouter.patch(
+  "/me",
+  auth,
+  // wait for request body including "image" key
+  fileUpload.single("image"),
+  [
+    check("name").isLength({ min: 2, max: 30 }),
+    check("username").isLength({ min: 6, max: 36 }),
+    check("email").not().isEmpty().isEmail(),
+    check("expertise").isLength({ max: 24 }),
+  ],
+  async (req, res, next) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log(errors);
+        throw new Error(
+          `Invalid inputs passed for updating user! Please try again!`
+        );
+      }
+      const updatedUser = await updateInstanceInDatabase(
+        "users",
+        req.body,
+        {
+          _id: req.user._id,
+        },
+        undefined,
+        req.user,
+        req.file?.path && req.file.path
+      );
+      if (updatedUser.error) {
+        const err = new Error(updatedUser.error);
+        err.status = 400;
+        // return next(err);
+        throw err;
+      }
+      res.json({ update: updatedUser });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+// Deposit money
+usersRouter.patch("/deposit", auth, async (req, res, next) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      console.log(errors);
+      throw new Error(
+        `Invalid inputs passed for updating user! Please try again!`
+      );
+    }
     const updatedUser = await updateInstanceInDatabase(
       "users",
       req.body,
@@ -136,16 +189,21 @@ usersRouter.delete("/me", auth, async (req, res, next) => {
     // const user = await deleteFromDatabaseById({ _id: req.user._id }, "users");
 
     // METHOD-2
+    const imagePath = req.user.image;
     await req.user.remove();
+    // remove img file on local folder when account is deleted
+    fs.unlink(imagePath, (error) => {
+      console.log(error);
+    });
     res.json({ message: "Account deleted sucessfully!" });
   } catch (error) {
     next(error);
   }
 });
 
-usersRouter.use((err, req, res, next) => {
-  const status = err.status || 500;
-  res.status(status).json({ error: err.message });
-});
+// usersRouter.use((err, req, res, next) => {
+//   const status = err.status || 500;
+//   res.status(status).json({ error: err.message });
+// });
 
 module.exports = usersRouter;

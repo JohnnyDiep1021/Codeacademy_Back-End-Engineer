@@ -62,7 +62,7 @@ envelopesRouter.post(
   auth,
   [
     check("category").not().isEmpty(),
-    check("budget").isFloat({ min: 0 }),
+    check("budget").isNumeric({ min: 0 }),
     check("notes").isArray({ max: 4 }),
   ],
   async (req, res, next) => {
@@ -232,10 +232,10 @@ envelopesRouter.delete("/", auth, async (req, res, next) => {
   }
 });
 
-// error-handler middleware
-envelopesRouter.use((err, req, res, next) => {
-  const status = err.status || 500;
-  res.status(status).json({ error: err.message });
-});
+// // error-handler middleware
+// envelopesRouter.use((err, req, res, next) => {
+//   const status = err.status || 500;
+//   res.status(status).json({ error: err.message });
+// });
 
 module.exports = envelopesRouter;

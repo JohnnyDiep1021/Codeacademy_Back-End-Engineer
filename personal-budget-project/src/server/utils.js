@@ -2,6 +2,7 @@ const Envelope = require("../db/model/envelope");
 const User = require("../db/model/user");
 const lodash = require("lodash");
 const mongoose = require("mongoose");
+const req = require("express/lib/request");
 
 const findDatabaseByName = function (name) {
   switch (name) {
@@ -187,7 +188,8 @@ const updateInstanceInDatabase = async function (
   instance,
   id = undefined,
   ownerId = undefined,
-  data = undefined
+  data = undefined,
+  imagePath = ""
 ) {
   try {
     const model = findDatabaseByName(modelType);
@@ -238,6 +240,8 @@ const updateInstanceInDatabase = async function (
         });
         break;
       case "users":
+        console.log(imagePath);
+        if (imagePath) data["image"] = imagePath;
         updates.forEach((update) => {
           if (update === "balance") {
             data[update] += instance[update];
