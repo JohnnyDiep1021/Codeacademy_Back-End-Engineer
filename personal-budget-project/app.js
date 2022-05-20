@@ -66,10 +66,15 @@ app.use((err, req, res, next) => {
 });
 mongoose
   .connect(
-    "mongodb+srv://taskapp:Fairytailmeothui2001@cluster0.2lb1a.mongodb.net/personal-budget-api?retryWrites=true&w=majority"
+    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.2lb1a.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
   )
   .then(() => {
     app.listen(PORT, () => {
+      console.log(
+        process.env.DB_USER,
+        process.env.DB_PASSWORD,
+        process.env.DB_NAME
+      );
       console.log(`Server is up on PORT ${PORT}`);
     });
   })
