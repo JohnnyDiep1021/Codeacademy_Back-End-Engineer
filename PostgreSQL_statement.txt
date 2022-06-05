@@ -1,0 +1,126 @@
+PostgreSQL Roles: Database Security
+
+Permission Name: SUPERUSER, CREATEROLE, CREATEDB, LOGIN, IN ROLE
+
+NOSUPERUSER is the default behavior when no option is specified.
+database default role name with SUPERUSER privileges: postgres
+
+Schema level permissions: 
+USAGE: allow a role to access tables within that schema
+CREATE, DROP: allow the grantee the ability to create or remove tables in that schema respectively.
+
+SELECT current_user => Get current role in use
+SELECT grantor, grantee, table_schema, table_name, privilege_type FROM information_schema.table_privileges
+=> description of the permissions a user (grantee) has on a table.
+SELECT rolname FROM pg_catalog.pg_roles; => listing all user roles in the database
+
+CREATE ROLE <rolname> WITH <Permission Name> => Superuser can create new roles
+SET ROLE <rolname> => regain a specific role privileges 
+ALTER ROLE <rolname> WITH <Permission Name> => give "rolname" with new permission
+GRANT/ REVOKE <permission1, permission2, ...> ON SCHEMA <schemaname> TO/FROM <rolname> 
+=> grant/revoke specific permissions on a specific schema
+GRANT/ REVOKE <permission1, permission2, ...> ON <schemaname.tablename/ tablename> TO/FROM <rolname>
+=> grant/revoke specific permissions on a specific table in a schema
+
+With default permissions, a superuser can set permissions to be updated automatically 
+when new objects are created in a schema. Default permissions only apply to objects created after 
+the defaults are set
+
+GRANT <permissions> ON <schemaname> TO <rolname>;
+GRANT <permissions> ON ALL TABLES IN <schemaname> TO <rolname>;
+ALTER DEFAULT PRIVILEGES IN SCHEMA <schemaname>/ IN DATABASE <database name> GRANT SELECT ON TABLES TO analyst;
+
+Groups role and Inheritance
+As members of a group role, as members, these roles will inherit certain permissions from that group. 
+For security reasons, PostgreSQL disallows the inheritance of certain powerful permissions such as 
+LOGIN, SUPERUSER, CREATEDB, and CREATEROLE. This prevents a developer from 
+accidentally granting high-level permissions to a wide group of users.
+
+CREATE ROLE <grouprolname> WITH <permissions> IN ROLE <memberrolname> 
+=> add users roles to group(s) roles on creation
+
+GRANT <rolname> TO <listofrolname> => grants all the permissions of the newly created role to the listed names.
+
+Column Level Security
+
+GRANT <permissions> (<col1>, <col2>, etc.) ON <tablename> to <rolname>;
+=> grant permissions to rolname on specific columns
+
+Row Level Security
+Allows developers to define permissions on individual rows. 
+
+CREATE POLICY <policyname> ON <tablename> FOR <permissions> TO <rolname> USING (conditions)
+e.g: conditions => USING (colname=current_user) 
+
+ALTER TABLE <tablename> ENABLE ROW LEVEL SECURITY; => enable RLS on the table the policy refers to.
+
+Introduction to Indexes
+An index is an organization of the data in a table to help with performance when searching and filtering records. 
+A table can have zero, one, or many indexes. There are some costs when using indexes, which we will cover later 
+in this lesson.
+
+SELECT * FROM pg_Indexes WHERE tablename='tablename'; =>  see what indexes exist on tables
+pg_Indexes is a built-in view in PostgreSQL. Different database servers have different ways to see their indexes.
+
+Benefits of an Index
+Indexing allows you to organize your database structure in such a way that it makes finding specific records 
+much faster. By default it divides the possible matching records in half, then half, then half, and
+so on until the specific match you are searching for is found. This is known as a Binary Tree, or B-Tree.
+In order to see the benefits of an index, a large database is required.
+
+Impact of Indexes
+filtering data
+
+To get insight into how PostgreSQL breaks down your statements into runnable parts, 
+we can investigate the query plan by adding EXPLAIN ANALYZE
+e.g EXPLAIN ANALYZE SELECT * FROM customers WHERE first_name='David';
+
+If you see “Seq Scan” this means that the system is scanning every record to find the specific records 
+you are looking for. If you see “Index” (in our examples more specifically “Bitmap Index Scan”) you know 
+that the server is taking advantage of an index to improve the speed of your search.
+
+The planning time is the amount of time the server spends deciding the best way to solve your query, should 
+it use an index, or do a full scan of the table(s) for instance. The execution time is the amount of time the 
+actual query takes to run after the server has decided on a plan of attack.
+
+CREATE INDEX <indexname> ON <tablename> (colname1, colname2, etc.)
+Creating indexes comes at the cost of increased runtime for any modification (insert, update, etc.) to the table 
+data impacting the user_name column. Another cost is the space that the index takes up.
+A multicolumn index referred to by other names as well, such as Composite or Compound.
+
+Conventional index naming pattern: tablename_colnames_idx
+
+DROP INDEX IF EXISTS <idxname>
+
+Index filtering
+building indexes will be used for filtering data quickly. If an index is created on the columns referenced in 
+these clauses, the database server will examine the index to see if it will improve the speed of the query.
+The index is built in the specific order listed at creation. The order will impact the efficiency of your searches.
+
+Recall that at its core, an index is an organization of the data in a table. When new data is added, the index 
+will be reshaped to fit that new data into its organization. This means that when you write a single statement 
+to modify the records, the server will have to modify every index that would be impacted by this change. If you are 
+adding a large amount of data to an existing table, it may be better to drop the index, add the data, and then 
+recreate the index rather than having to update the index on each insertion.
+
+If you have multiple indexes on a single table and you insert a record, you will need to update each 
+index associated with the table. This can make indexes very costly.
+
+Updates and deletes have similar drawbacks. When deleting a record that is associated with an index, it 
+might be faster to find the record — by leveraging the index’s ability to search. However, once the record is 
+found, removing or editing it will result in the same issue as inserting a new record. The index itself will need 
+to be redone. Note that if you’re updating a non-indexed column, that update will be unaffected by the index. So 
+if you are updating a non-indexed column while filtering by one with an index, an update statement can actually be 
+faster with an index.
+
+When should an index be added?
+The simple answer is when the benefits of searching outweigh the burdens of storage size and 
+Insert/Update/Delete speed. One thing to consider is whether searching will occur often enough to make 
+the advantages worth the time and effort.
+
+pg_size_pretty(pg_total_relation_size('tablename') => get the total size include database table + index size
+pg_size_pretty(pg_indexes_size('idxname')) => get the size of a specific idx 
+pg_size_pretty(pg_table_size('tablename')) => get the size of a specific table
+pg_size_pretty(pg_database_size('databasename')) => get the size of the database
+ 
+
