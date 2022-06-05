@@ -68,6 +68,10 @@ much faster. By default it divides the possible matching records in half, then h
 so on until the specific match you are searching for is found. This is known as a Binary Tree, or B-Tree.
 In order to see the benefits of an index, a large database is required.
 
+Increase in speed of searches/filtering
+Increase in storage space
+Increase in runtime for Insert/Update/Delete on impacted indexes.
+
 Impact of Indexes
 filtering data
 
@@ -123,4 +127,38 @@ pg_size_pretty(pg_indexes_size('idxname')) => get the size of a specific idx
 pg_size_pretty(pg_table_size('tablename')) => get the size of a specific table
 pg_size_pretty(pg_database_size('databasename')) => get the size of the database
  
+Partial Index
+A partial index allows for indexing on a subset of a table, allowing searches to be conducted on just this group of 
+records in the table. Notice that the filtering of the index does not have to be for a column that is part of your index.
 
+CREATE INDEX <idxname> ON <tblname> (<colnames>)
+WHERE conditions;
+
+Order by
+If you are commonly ordering your data in a specific way on an indexed column, you can add this information to the 
+index itself and PostgreSQL will store the data in your desired order.
+
+CREATE INDEX <idxname> ON <tblname> (<colnames> [DESC/ ASC/ NULL FIRST/ NULL LAST])
+
+A unique index, primary key, and unique constraint all reject any attempt to have two records in a table that would 
+have the same value (multicolumns versions of these would reject any record where all the columns are equal).
+As a note, the primary key index standard is to end in _pkey instead of _idx to identify it as a specific type of index. 
+It is also the way the system names it when created automatically.
+
+Clustered Index
+
+We learned in the previous lesson that an index is an organization of the data in a table. A table can have many indexes. 
+To expand on this, all indexes are either a clustered index or a non-clustered index.
+- A clustered index is often tied to the table’s primary key.
+- When a clustered index is created for a table, the data is physically organized in the table structure to allow 
+for improved search times. 
+- Clustered index like searching a dictionary.
+- There can only be one clustered index per table.
+
+When the system creates, alters, or refreshes a clustered index, it takes all the records in your database table 
+that are in memory and rearranges them to match the order of your clustered index, physically altering their location 
+in storage
+
+CLUSTER <tblname> USING <idxname>; => cluster database table using an existing index
+CLUSTER <tblname>; => recluster database table
+CLUSTER; => cluster every table that has an identified index to use
