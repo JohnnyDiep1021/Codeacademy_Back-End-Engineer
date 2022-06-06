@@ -87,7 +87,7 @@ The planning time is the amount of time the server spends deciding the best way 
 it use an index, or do a full scan of the table(s) for instance. The execution time is the amount of time the 
 actual query takes to run after the server has decided on a plan of attack.
 
-CREATE INDEX <indexname> ON <tablename> (colname1, colname2, etc.)
+CREATE INDEX [UNIQUE] <indexname> ON <tablename> (exp(colname1, colname2, etc.))
 Creating indexes comes at the cost of increased runtime for any modification (insert, update, etc.) to the table 
 data impacting the user_name column. Another cost is the space that the index takes up.
 A multicolumn index referred to by other names as well, such as Composite or Compound.
@@ -122,11 +122,6 @@ The simple answer is when the benefits of searching outweigh the burdens of stor
 Insert/Update/Delete speed. One thing to consider is whether searching will occur often enough to make 
 the advantages worth the time and effort.
 
-pg_size_pretty(pg_total_relation_size('tablename') => get the total size include database table + index size
-pg_size_pretty(pg_indexes_size('idxname')) => get the size of a specific idx 
-pg_size_pretty(pg_table_size('tablename')) => get the size of a specific table
-pg_size_pretty(pg_database_size('databasename')) => get the size of the database
- 
 Partial Index
 A partial index allows for indexing on a subset of a table, allowing searches to be conducted on just this group of 
 records in the table. Notice that the filtering of the index does not have to be for a column that is part of your index.
@@ -146,7 +141,6 @@ As a note, the primary key index standard is to end in _pkey instead of _idx to 
 It is also the way the system names it when created automatically.
 
 Clustered Index
-
 We learned in the previous lesson that an index is an organization of the data in a table. A table can have many indexes. 
 To expand on this, all indexes are either a clustered index or a non-clustered index.
 - A clustered index is often tied to the table’s primary key.
@@ -162,3 +156,59 @@ in storage
 CLUSTER <tblname> USING <idxname>; => cluster database table using an existing index
 CLUSTER <tblname>; => recluster database table
 CLUSTER; => cluster every table that has an identified index to use
+
+Non-Clustered Index
+You can create many indexes on a table, but only one can be a clustered index, so what about the rest? They are known as 
+non-clustered indexes
+Non-clustered indexes have records of the columns they are indexing and a pointer back to the actual data in the table 
+When you search on a non-clustered index for more information than is in the indexed columns, there are two searches. 
+The first to find the record in the index and another to find the record the pointer identifies.
+
+Recap:
+A clustered index contains all the information in your table and physically reorganizes the way it is stored in memory. 
+A non-clustered index creates a key on the columns you indicate and a pointer back to the main table for any columns not part of 
+the index.
+
+Data Normalization
+The process of restructuring a database in this way is called normalization. There are formal names and definitions for 
+different levels of restructuring; the most common are first, second, and third normal form (1NF, 2NF, 3NF). 
+In practice, the formal vocabulary tends to be used in academic settings
+Data normalization can be a solution for duplicated data, 
+
+CREATE TABLE new_table_name AS SELECT... => create a new table from an existing one
+
+Data update challenges: modify the duplicated information => make the same updates in multiple locations.
+
+Data insertion challenges: when all columns in a table do not depend on the primary key: new data cannot be inserted into the 
+table until a primary key is known => theoretically come up with a fake student ID and leave non-relevant columns empty =>
+future mistakes and inconsistencies
+
+Data Maintenence
+SELECT relname, n_dead_tup, n_live_tup, last_vacuum, last_autovacuum, last_analyze FROM pg_stat_all_tables
+=> pg_stat_all_tables is a table that shows statistics about usage statistics for each table in the database.
+
+ANALYZE <tblname>
+running ANALYZE with no table name specified will perform an ANALYZE on all tables in the database.
+
+Managing the size of your database tables to keep the tables and indexes in your database small can ensure better 
+query performance, more efficient disk utilization, and lower database costs.
+
+pg_size_pretty can be used with the functions above to format a number in bytes as KB, MB, or GB.
+
+pg_size_pretty(pg_total_relation_size('tablename') => get the total size include database table + index size
+pg_size_pretty(pg_indexes_size('idxname')) => get the size of a specific idx 
+pg_size_pretty(pg_table_size('tablename')) => get the size of a specific table
+pg_size_pretty(pg_database_size('databasename')) => get the size of the database
+ 
+When an UPDATE or DELETE is called, PostgreSQL doesn’t physically delete the content from the disk. Instead, the database engine 
+marks those rows so that they aren’t returned in user queries. These rows are called dead tuples, and although they aren’t 
+referenced in the current version of databases’ tables, they still occupy space on disk and can affect performance.
+when UPDATE a table. PostgreSQL creates a new row and marks an “old” row invalid, causing the size of the table to increase
+
+VACUUM <table name> => vacuum a specific table, while a VACUUM statement without a table name will run on the 
+entire database.
+
+A plain VACUUM will only clear tables’ dead tuples where possible. Depending on which rows in your table are updated, 
+this can clear anywhere between 0 and 100% of dead tuples. If VACUUM cannot clear the dead tuples, PostgreSQL will mark 
+the space occupied by dead tuples for reuse when new data is inserted into the table => may not see much of a decrease in space 
+before and after a vacuum.
