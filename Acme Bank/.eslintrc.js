@@ -1,13 +1,13 @@
 module.exports = {
-  env: {
-    browser: true,
-    commonjs: true,
-    es2021: true,
-  },
-  parserOptions: {
-    ecmaVersion: 12,
-  },
-  rules: {
-    strict: ["global"],
-  },
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es2021": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaVersion": 12
+    },
+    "rules": {
+    }
 };

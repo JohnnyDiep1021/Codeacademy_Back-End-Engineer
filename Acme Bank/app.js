@@ -82,8 +82,8 @@ app.post("/auth", function (request, response) {
 //Home Menu No Exploits Here.
 app.get("/home", function (request, response) {
   if (request.session.loggedin) {
-    username = request.session.username;
-    balance = request.session.balance;
+    const username = request.session.username;
+    const balance = request.session.balance;
     response.render("home_page", { username, balance });
   } else {
     response.redirect("/");
@@ -95,7 +95,7 @@ app.get("/home", function (request, response) {
 app.get("/transfer", csrfMiddleware, function (request, response) {
   if (request.session.loggedin) {
     var sent = "";
-    response.render("transfer", { sent, crsfToken: req.crsfToken() });
+    response.render("transfer", { sent, crsfToken: request.crsfToken });
   } else {
     response.redirect("/");
   }
@@ -109,6 +109,7 @@ app.post("/transfer", csrfMiddleware, function (request, response) {
     var account_to = parseInt(request.body.account_to);
     var amount = parseInt(request.body.amount);
     var account_from = request.session.account_no;
+    let sent;
     if (account_to && amount) {
       if (balance > amount) {
         db.get(
@@ -123,17 +124,20 @@ app.post("/transfer", csrfMiddleware, function (request, response) {
           `UPDATE users SET balance = balance - $amount WHERE account_no = $account_from`,
           { $amount: amount, $account_from: account_from },
           function (error, results) {
-            var sent = "Money Transfered";
-            response.render("transfer", { sent, crsfToken: req.crsfToken() });
+            sent = "Money Transfered";
+            response.render("transfer", {
+              sent,
+              crsfToken: request.crsfToken,
+            });
           }
         );
       } else {
-        var sent = "You Don't Have Enough Funds.";
-        response.render("transfer", { sent, crsfToken: req.crsfToken() });
+        sent = "You Don't Have Enough Funds.";
+        response.render("transfer", { sent, crsfToken: request.crsfToken });
       }
     } else {
-      var sent = "";
-      response.render("transfer", { sent, crsfToken: req.crsfToken() });
+      sent = "";
+      response.render("transfer", { sent, crsfToken: request.crsfToken });
     }
   } else {
     response.redirect("/");
@@ -143,7 +147,7 @@ app.post("/transfer", csrfMiddleware, function (request, response) {
 //PATH TRAVERSAL CODE
 app.get("/download", function (request, response) {
   if (request.session.loggedin) {
-    file_name = request.session.file_history;
+    const file_name = request.session.file_history;
     response.render("download", { file_name });
   } else {
     response.redirect("/");
@@ -159,13 +163,17 @@ app.post("/download", function (request, response) {
     response.setHeader("Content-Type", "text/html");
 
     // Change the filePath to current working directory using the "path" method
-    const filePath = "history_files/" + file_name;
-    const root_directory = process.cwd + "/history_files/" + file_name;
     const rootDir = "history_files\\";
-    console.log(root_directory);
+    const filePath = path.join(process.cwd(), "/history_files/", file_name);
+    const fileName = path.normalize(filePath);
+    console.log(filePath);
     try {
-      content = fs.readFileSync(root_directory, "utf8");
-      response.end(content);
+      if (fileName.indexOf(rootDir) < 0) {
+        response.end(`File not found!`);
+      } else {
+        const content = fs.readFileSync(filePath, "utf8");
+        response.end(content);
+      }
     } catch (err) {
       console.log(err);
       response.end("File not found");
