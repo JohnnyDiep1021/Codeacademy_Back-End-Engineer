@@ -1,7 +1,29 @@
+Hash maps map keys to their related values, and are one of the most efficient data structures when it comes to retrieving stored data. This is because the key associated with every value added allows for faster retrieval later on. When you come across a coding problem that requires you to store and retrieve data, keep in mind that hash maps will often be the most efficient data structure for that scenario.
+
 Hash map: A key-value store that uses an array and a hashing function to save and retrieve values.
 Key: The identifier given to a value for later retrieval.
-Hash function: A function that takes some input and returns a number.
+
+Hash function: A function that takes some input and returns a number. This function is said to be deterministic. That means the hashing function must always return the same index when given the same key. This is important because we will need to hash the key again later to retrieve the stored value.
+
+The hashing function should follow this logic:
+
+declare hashCode variable with value of 0
+for each character in the key
+  add the sum of the current character code value and hashCode to hashCode
+return hashCode
+
+Adding the sum of hashCode and the character code to the hashCode again creates a deterministic and also non-reversible implementation of a hashing function. This avoids generating a duplicate index if keys have the same characters in different orders, such as bat and tab.
+
 Compression function: A function that transforms its inputs into some smaller range of possible outputs.
+
+The updated .hash() should follow these steps:
+initialize hashCode variable to 0
+for each character in the key
+   add the character code and hashCode to hashCode
+return compressed hashCode
+
+
+collision: When two different keys resolve to the same array index this is called a collision.
 
 Recipe for saving to a hash table:
 - Take the key and plug it into the hash function, getting the hash code.
@@ -15,3 +37,11 @@ Recipe for retrieving from a hash table:
 - Check if the array at that index has contents, if so, check the key saved there.
 - If the key matches the one you're looking for, return the value.
 - If the keys don't match, continue to the next position depending on your collision strategy.
+
+
+
+Hash maps are data structures that serve as efficient key-value stores. They are capable of assigning and retrieving data in the fastest way possible. This is because the underlying data structure that hash maps use is an array.
+
+A value is stored at an array index determined by plugging the key into a hash function. Because we always know exactly where to find values in a hash map, we have constant access to any of the values it contains.
+
+This quick access to values makes a hash map a good choice of data structure whenever we need to store a lot of values but need fast look-up time.

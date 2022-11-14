@@ -1,0 +1,250 @@
+Recursion
+Get started with recursion!
+
+Have you ever thought about what would happen if you called a function or method from within that function or method? That’s called recursion and can actually make your program more efficient. It can be used for problems that can be broken up into multiple steps, often ones that you would otherwise solve iteratively. It will also be used in some of the traversal and sort algorithms that you will see later!
+
+Introduction to Recursion
+Recursion is a computational approach where a function calls itself from within its body. Programmers use recursion when they need to perform a similar action multiple times in a row until it reaches a predefined stopping point, also known as a base case.
+
+Let’s think about this in the context of our factorial example.
+
+In recursion, the recursive case is the condition under which a function calls itself. We call this the recursive case because, as mentioned last exercise, recursion is defined as a process when a function calls itself.
+
+You’ve heard about a trendy new spot that sells fruit sandwiches. What are fruit sandwiches? You have no idea, but you’re eager to find out!
+
+Sadly, when you arrive at the store, the line is out the door and around the block. Undeterred, you hatch a plan to find out how many people are in line before you.
+
+You tap the person in front of you and ask them how many people are ahead of them. They have no idea, (the line is huge!) so they ask you to wait a moment and tap the person in front of them, repeating this process through the line.
+
+Finally, the second to last person taps the person at the front of the line. Nobody is ahead of them, so they reply “It’s just me so: one person!”. Then this message is repeated back down the line.
+
+The next person says “okay, there was one person ahead of me, I’ll add myself… I can tell the person behind me: 2 people in line.”
+
+Each person waiting for a reply:
+
+receives the message
+adds themselves to the count
+responds to the person tapping them
+This chain eventually reaches you with the final number. Your plan was a success!
+
+You executed a recursive strategy. The “function” of asking a person involved asking a person. The self-referential logic can seem like it goes on forever, but each question brings you closer to the front of the line where no more people are asked about the line.
+
+Your approach had two aspects which are essential to recursive thinking. Break the problem into two possibilities:
+
+There’s nobody left in line, don’t ask
+There’s someone in line, ask them
+We repeat Step 2 with a different input which brings us closer to Step 1.
+
+Instructions
+What are the repetitive parts of your strategy?
+
+When did things stop repeating? Why?
+
+Recursion Outline
+Recursion is a strategy for solving problems by defining the problem in terms of itself. For example, to sum the elements of a list we would take the first element and add it to the sum of the remaining elements.
+
+How would we get that sum of remaining elements? Easy! We’d take the first element of the remaining elements and add it to the… Maybe you can understand why recursion can be a tricky subject!
+
+In programming, recursion means a function definition will include an invocation of the function within its own body. Here’s a pseudo-code example:
+
+define function, speller
+  if there are no more letters
+    print "all done"
+  print the first letter
+  invoke speller with the given name minus the first letter
+If we invoked this function with “Zoe” as the argument, we would see “Z”, “o”, and “e” printed out before “all done”.
+
+We call the function a total of 4 times!
+
+function called with “Zoe”
+function called with “oe”
+function called with “e”
+function called with “”
+Let’s break the function into three chunks:
+
+   if there are no more letters
+     print "all done"
+This section is the base case. We are NOT invoking the function under this condition. The equivalent base case from the previous exercise was when we had reached the front of the line.
+
+   print the first letter
+This section solves a piece of the problem. If we want to spell someone’s name, we’ll have to spell at least one letter.
+
+   invoke speller with the given name minus the first letter
+This section is the recursive step, calling the function with arguments which bring us closer to the base case. In this example, we’re reducing the length of the name by a single letter. Eventually, there will be a function call with no letters given as the argument.
+
+For comparison’s sake, here is pseudo-code for an iterative approach to the same problem:
+
+ define function, speller
+   for each letter in the name argument
+     print the letter
+   print "all done"
+Instructions
+Compare the two pseudo-code functions.
+
+How are they different? What parts are similar?
+
+How is it possible for a function to resolve if it refers to itself?
+
+Call Stacks and Execution Frames
+A recursive approach requires the function invoking itself with different arguments. How does the computer keep track of the various arguments and different function invocations if it’s the same function definition?
+
+Repeatedly invoking functions may be familiar when it occurs sequentially, but it can be jarring to see this invocation occur within a function definition.
+
+Languages make this possible with call stacks and execution contexts.
+
+Stacks, a data structure, follow a strict protocol for the order data enters and exits the structure: the last thing to enter is the first thing to leave.
+
+Your programming language often manages the call stack, which exists outside of any specific function. This call stack tracks the ordering of the different function invocations, so the last function to enter the call stack is the first function to exit the call stack.
+
+We can think of execution contexts as the specific values we plug into a function call.
+
+A function which adds two numbers:
+ 
+Invoking the function with 3 and 4 as arguments...
+execution context:
+X = 3
+Y = 4
+ 
+Invoking the function with 6 and 2 as arguments...
+execution context:
+X = 6
+Y = 2
+Consider a pseudo-code function which sums the integers in an array:
+
+ function, sum_list 
+   if list has a single element
+     return that single element
+   otherwise...
+     add first element to value of sum_list called with every element minus the first
+This function will be invoked as many times as there are elements within the list! Let’s step through:
+
+CALL STACK EMPTY
+___________________
+ 
+Our first function call...
+sum_list([5, 6, 7])
+ 
+CALL STACK CONTAINS
+___________________
+sum_list([5, 6, 7])
+with the execution context of a list being [5, 6, 7]
+___________________
+ 
+Base case, a list of one element not met.
+We invoke sum_list with the list of [6, 7]...
+ 
+CALL STACK CONTAINS
+___________________
+sum_list([6, 7])
+with the execution context of a list being [6, 7]
+___________________
+sum_list([5, 6, 7])
+with the execution context of a list being [5, 6, 7]
+___________________
+ 
+Base case, a list of one element not met.
+We invoke sum_list with the list of [7]...
+ 
+CALL STACK CONTAINS
+___________________
+sum_list([7])
+with the execution context of a list being [7]
+___________________
+sum_list([6, 7])
+with the execution context of a list being [6, 7]
+___________________
+sum_list([5, 6, 7])
+with the execution context of a list being [5, 6, 7]
+___________________
+ 
+We've reached our base case! List is one element. 
+We return that one element.
+This return value does two things:
+ 
+1) "pops" sum_list([7]) from CALL STACK.
+2) provides a return value for sum_list([6, 7])
+ 
+----------------
+CALL STACK CONTAINS
+___________________
+sum_list([6, 7])
+with the execution context of a list being [6, 7]
+RETURN VALUE = 7
+___________________
+sum_list([5, 6, 7])
+with the execution context of a list being [5, 6, 7]
+___________________
+ 
+sum_list([6, 7]) waits for the return value of sum_list([7]), which it just received. 
+ 
+sum_list([6, 7]) has resolved and "popped" from the call stack...
+ 
+ 
+----------------
+CALL STACK contains
+___________________
+sum_list([5, 6, 7])
+with the execution context of a list being [5, 6, 7]
+RETURN VALUE = 6 + 7
+___________________
+ 
+sum_list([5, 6, 7]) waits for the return value of sum_list([6, 7]), which it just received. 
+sum_list([5, 6, 7]) has resolved and "popped" from the call stack.
+ 
+ 
+----------------
+CALL STACK is empty
+___________________
+RETURN VALUE = (5 + 6 + 7) = 18
+Instructions
+When a recursive function enters the base case without any recursive calls, will the call stack be empty?
+Why or why not?
+
+https://www.youtube.com/watch?v=Qm4axEzqw0k&t=12s
+
+Base Case and Recursive Step
+Recursion has two fundamental aspects: the base case and the recursive step.
+
+When using iteration, we rely on a counting variable and a boolean condition. For example, when iterating through the values in a list, we would increment the counting variable until it exceeded the length of the dataset.
+
+Recursive functions have a similar concept, which we call the base case. The base case dictates whether the function will recurse, or call itself. Without a base case, it’s the iterative equivalent to writing an infinite loop.
+
+Because we’re using a call stack to track the function calls, your computer will throw an error due to a stack overflow if the base case is not sufficient.
+
+The other fundamental aspect of a recursive function is the recursive step. This portion of the function is the step that moves us closer to the base case.
+
+In an iterative function, this is handled by a loop construct that decrements or increments the counting variable which moves the counter closer to a boolean condition, terminating the loop.
+
+In a recursive function, the “counting variable” equivalent is the argument to the recursive call. If we’re counting down to 0, for example, our base case would be the function call that receives 0 as an argument. We might design a recursive step that takes the argument passed in, decrements it by one, and calls the function again with the decremented argument. In this way, we would be moving towards 0 as our base case.
+
+Analyzing the Big O runtime of a recursive function is very similar to analyzing an iterative function. Substitute iterations of a loop with recursive calls.
+
+For example, if we loop through once for each element printing the value, we have a O(N) or linear runtime. Similarly, if we have a single recursive call for each element in the original function call, we have a O(N) or linear runtime.
+
+Instructions
+How are iteration and recursion similar? How are they different?
+
+Can we rewrite any iterative function in a recursive way? Why or why not?
+
+Cheatsheet
+https://www.codecademy.com/learn/paths/back-end-engineer-career-path/tracks/becp-22-algorithms/modules/wdcp-22-recursion/cheatsheet
+
+A recursive function which has no base case, or a recursive step that does not lead to the base case, will cause what?
+=> A stack overflow
+
+When analyzing the Big O runtime of recursive functions, we count the ____.
+=> relation of input to function calls.
+The relationship of function calls to input size determines the Big O runtime.
+
+What is an execution context and how does it relate to recursion?
+=> an execution context contains the variables within each recursive function call. Separate recursive calls each have their own variables.
+
+Recursion is typically more efficient than iteration.
+=> Recursion has additional overhead of function frames on the call stack.
+
+Review
+While every recursive problem is a little different, the following features will always be required:
+
+Recursive case – the conditions under which the function will perform an action and call itself.
+Base case – the conditions under which the function returns a value without making any additional calls to itself.
+In this example, we started by considering the recursive case. With some problems it may be easier to start with the base case. Regardless, when you are dealing with a recursive problem, start by considering each of these cases.
