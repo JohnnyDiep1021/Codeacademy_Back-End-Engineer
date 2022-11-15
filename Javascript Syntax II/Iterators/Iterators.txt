@@ -1,0 +1,28 @@
+Cheatsheet - iterators
+https://www.codecademy.com/learn/paths/back-end-engineer-career-path/tracks/becp-22-javascript-syntax-part-ii/modules/wdcp-22-learn-javascript-syntax-iterators/cheatsheet
+
+A higher-order function is a function that either accepts functions as parameters, returns a function, or both! We call functions that get passed in as parameters callback functions. Callback functions get invoked during the execution of the higher-order function.
+
+An anonymous function (a function without a name) can be arguments too!
+
+Great job! By thinking about functions as data, and learning about higher-order functions, you’ve taken important steps in learning to write clean, modular code that takes advantage of JavaScript’s flexibility.
+
+
+Review
+
+Abstraction allows us to write complicated code in a way that’s easy to reuse, debug, and understand for human readers.
+
+We can work with functions the same way we work with any other type of data, including reassigning them to new variables.
+
+JavaScript functions are first-class objects, so they have properties and methods like any other object.
+
+Functions can be passed into other functions as parameters.
+
+A callback function is a function passed as an argument into another function.
+
+A higher-order function is a function that either accepts functions as parameters, returns a function, or both.
+
+Iterators are methods called on arrays to manipulate elements and return values.
+
+Cheatsheet - Array Iteration methods
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Iteration_methods
