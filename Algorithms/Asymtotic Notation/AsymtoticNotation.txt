@@ -1,0 +1,234 @@
+Why Asymptotic Notation?
+Learn why asymptotic notation is an essential tool for becoming an efficient programmer.
+
+When writing programs, it’s important to make smart programming choices so that code runs most efficiently. Computers seem to take no time evaluating programs, but when scaling programs to deal with massive amounts of data, writing efficient code becomes the difference between success and failure. In computer science, we define how efficient a program is by its runtime.
+
+We can’t just time the program, however, because different computers run at different speeds. My dusty old PC does not run as fast as your brand new laptop. Programming is also done in many different languages, how do we account for that in the runtime? We need a general way to define a program’s runtime across these variable factors. We do this with Asymptotic Notation.
+
+With asymptotic notation, we calculate a program’s runtime by looking at how many instructions the computer has to perform based on the size of the program’s input. For example, if I were calculating the maximum element in a collection, I would need to examine each element in the collection. That examining step is the same regardless of the language used, or the CPU that’s performing the calculation. In asymptotic notation, we define the size of the input as N. I may be looking through a collection of 10 elements, or 100 elements, but we only need to know how many steps are performed relative to the input so N is used in place of a specific number. If there is a second input, we may define the size of that input as M.
+
+There are varieties of asymptotic notation that focus on different concerns. Some will communicate the best case scenario for a program. For example, if we were searching for a value within a collection, the best case would be if we found that element in the first place we looked. Another type will focus on the worst case scenario, such as if we searched for a value, looked in the entire dataset and did not find it. Typically programmers will focus on the worst case scenario so there is an upper bound of runtime to communicate. It’s a way of saying “things may get this bad, or slow, but they won’t get worse!”
+
+In this next module, we will learn more about asymptotic notation, how to properly analyze the runtime of a program through asymptotic notation, and how to take into consideration the runtime of different data structures and algorithms when creating programs. Learning these skills will change the way you think when you design programs and it will prepare you for the software engineering world where creating efficient programs is an essential skill.
+
+What is Asymptotic Notation?
+Cheetahs. Ferraris. Life. All are fast, but how do you know which one is the fastest? You can measure a cheetah’s and a Ferrari’s speed with a speedometer. You can measure life with years and months.
+
+But what about computer programs? In fact, you can time a computer program, but different computers run at different speeds. For example, a program that takes 12 nanoseconds on one computer could take 45 milliseconds on another. Therefore, we need a more general way to gauge a program’s runtime. We do this with Asymptotic Notation.
+
+Instead of timing a program, through asymptotic notation, we can calculate a program’s runtime by looking at how many instructions the computer has to perform based on the size of the program’s input: N.
+
+For instance, a program that has input of size N may tell the computer to run 5N2+3N+2 instructions. (We will get into how we get this kind of expression in future exercises.) Nevertheless, this is still a fairly messy and large expression. For asymptotic notation, we drop all of our constants (the numbers) because as N becomes extremely large, the constants will make minute differences. After changing our constants, we have N2+N. If we take each of these terms in the expression and graph them, we see that the N2 term grows faster than the N term.
+
+alt text
+
+For example, when N is 1000:
+
+the N2 term is 1,000,000
+the N term is 1,000
+As you can see, the N2 term is much more significant than the N term. When N is larger than 1000, the difference becomes even more significant. Because the difference is so enormous, we don’t even need to consider the N term when calculating the runtime. Thus, for this program, we would describe the runtime in terms of N2. There are three different ways we could describe the runtime of this program: big Theta or Θ(N2), big O or O(N2), big Omega or Ω(N2). The difference between the three and when to use which one will be detailed in the next exercises.
+
+You may see the term execution count used in evaluating algorithms. Execution count is more precise than Big O notation. The following method, addUpTo(), depending on how we count the number of operations, can be as low as 2N or as high as 5N + 2
+
+public class Main() { 
+  void int addUpTo(int n) {
+    int total = 0;
+    for (int i = 1; i <= n; i++) {
+      total += i;
+    }
+  return total;
+  } 
+}
+Determining execution count can increase in difficulty as our algorithms become even more sophisticated!
+
+But regardless of the execution count, the number of operations grows roughly proportionally with n. If n doubles, the number of operations will also roughly double.
+
+Big O Notation is a way to formalize fuzzy counting. It allows us to talk formally about how the runtime of an algorithm grows as the inputs grow. As we will see, Big O doesn’t focus on the details, only the trends
+
+Big Theta (Θ)
+The first subtype of asymptotic notation we will explore is big Theta (denoted by Θ). We use big Theta when a program has only one case in term of runtime. But what exactly does that mean? Take a look at the pseudocode for a function that prints the values in a list below:
+
+Function with input that is a list of size N:
+   For each value in list:
+    Print the value
+The number of instructions the computer has to perform is based on how many iterations the loop will do because if the loop does more iterations, then the computer will perform instructions. Now, let’s see how many iterations the loop will do dependent on the value of N.
+
+As we can see in every case, with a list of size N, the program has a runtime of N because the program has to print a value N times. Thus, we would say the runtime is Θ(N).
+
+Let’s look at a more complicated example. In the following pseudocode program, the function takes in an integer, N, and counts the number of times it takes for N to be divided by 2 until N reaches 1.
+
+Function that has integer input N:
+    Set a count variable to 0
+    Loop while N is not equal to 1:
+        Increment count
+        N = N/2
+    Return count
+
+As we can see, in every case, with an integer N, the loop will iterate log2(N) times. However, because we drop constants in asymptotic notation, we would say that the runtime of this program is Θ(log N).
+
+But what happens when there are multiple runtime cases for a single program? We will learn about that in a future exercise.
+
+video resource:
+https://www.youtube.com/watch?v=LkjqqGg0VN0&feature=emb_title
+
+Common Runtimes
+a list of common runtimes that run from fastest to slowest.
+
+Θ(1). This is constant runtime. This is the runtime when a program will always do the same thing regardless of the input. For instance, a program that only prints “hello, world” runs in Θ(1) because the program will always just print “hello, world”.
+Θ(log N). This is logarithmic runtime. You will see this runtime in search algorithms.
+Θ(N). This is linear runtime. You will often see this when you have to iterate through an entire dataset.
+Θ(N*logN). You will see this runtime in sorting algorithms.
+Θ(N2). This is an example of a polynomial runtime. When N is raised to the 2nd power, it’s known as a quadratic runtime. You will see this runtime when you have to search through a two-dimensional dataset (like a matrix) or nested loops.
+Θ(2N). This is exponential runtime. You will often see this runtime in recursive algorithms (Don’t worry if you don’t know what that is yet!).
+Θ(N!). This is factorial runtime. You will often see this runtime when you have to generate all of the different permutations of something. For instance, a program that generates all the different ways to order the letters “abcd” would run in this runtime.
+
+Big Omega (Ω) and Big O (O)
+Sometimes, a program may have a different runtime for the best case and worst case. For instance, a program could have a best case runtime of Θ(1) and a worst case of Θ(N). We use a different notation when this is the case. We use big Omega or Ω to describe the best case and big O or O to describe the worst case. Take a look at the following pseudocode that returns True if 12 is in the list and False otherwise:
+
+Function with input that is a list of size N:
+    For each value in the list:
+        If value is equal to 12:
+            Return True
+    Return False
+How many times will the loop iterate? Let’s take a list of size 1000. If the first value in the list was 12, then the loop would only iterate once. However, if 12 wasn’t in the list at all, the loop would iterate 1000 times. If the input was a list of size N, the loop could iterate anywhere from 1 to N times depending on where 12 is in the list (or if it’s in the list at all). Thus, in the best case, it has a constant runtime and in the worst case it has a linear runtime.
+
+There are many ways we could describe the runtime of this program:
+
+This program has a best case runtime of Θ(1).
+This program has a worst case runtime of Θ(N).
+This program has a runtime of Ω(1).
+This program has a runtime O(N).
+You may be tempted to say the following:
+
+This program has a runtime of Θ(N).
+However, this is not true because the program does not have a linear runtime in every case, only the worst case.
+
+In fact, when describing runtime, people typically discuss the worst case because you should always prepare for the worst case scenario! Often times, in technical interviews, they will only ask you for the big O of a program.
+
+Adding Runtimes
+Sometimes, a program has so much going on that it’s hard to find the runtime of it. Take a look at the pseudocode program that first prints all the positive values up to N and then returns the number of times it takes to divide N by 2 until N is 1.
+
+Function that takes a positive integer N:
+    Set a variable i equal to 1
+    Loop until i is equal to N:
+        Print i
+        Increment i
+ 
+    Set a count variable to 0
+    Loop while N is not equal to 1:
+        Increment count
+        N = N/2
+    Return count
+Rather than look at this program all at once, let’s divide into two chunks: the first loop and the second loop.
+
+In the first loop, we iterate until we reach N. Thus the runtime of the first loop is Θ(N).
+However, the second loop, as demonstrated in a previous exercise, runs in Θ(log N).
+Now, we can add the runtimes together, so the runtime is Θ(N) + Θ(log N).
+
+However, when analyzing the runtime of a program, we only care about the slowest part of the program, and because Θ(N) is slower than Θ(log N), we would actually just say the runtime of this program is Θ(N). It is also appropriate to say the runtime is O(N) because if it runs in Θ(N) for every case, then it also runs in Θ(N) for the worst case. Most of the time people will just use big O notation.
+
+Review
+
+We use asymptotic notation to describe the runtime of a program. The three types of asymptotic notation are big Theta, big Omega, and big O.
+We use big Theta (Θ) to describe the runtime if the runtime of the program is the same in every case.
+The different common runtimes from fastest to slowest are: Θ(1), Θ(log N), Θ(N), Θ(N log N), Θ(N2), Θ(2N), Θ(N!).
+We use big Omega (Ω) to describe the best-case running time of a program.
+We use big O (O) to describe the worst-case running time of a program.
+We typically describe a program’s running time in terms of big O.
+When finding the runtime of a program with multiple steps, you can divide the program into different sections and add the runtimes of the various sections. You can then take the slowest runtime and use that runtime to describe the entire program.
+When analyzing the runtime of a program, we care about which part of the program is the slowest.
+
+
+With Big O notation, we evaluate a function’s runtime efficiency based on the _____?
+Big O is meant to give a worst case runtime of a function based on its input.
+
+An identical algorithm written in two different programming languages will have the same Big O runtime complexity.
+TRUE => Big O is meant to be coarse enough to communicate the efficiency of an algorithm across programming language boundaries.
+
+Suppose we had a function that performed one step for each element in a collection of input data. What would the Big O time complexity be for this function?
+=> Linear: O(N); This function is performing steps in a 1 : 1 ratio with the input data. That makes it a linear runtime.
+
+A function which only performed the operation 6 + 9 would be which Big O time complexity?
+=> This function would be performing a mathematical operation independent of the input, which makes it O(1).
+
+Suppose we had a function that took in a list of data as an input. For each element in the list, the function compared it to every other element in the collection. What would the Big O time complexity be for this function?
+=> Quadratic: O(N^2)
+
+Suppose we had a function that iterated through a collection of data once to find the minimum value, and then again in a separate iteration to find the maximum value. How would we write the Big O time complexity?
+=> O(N); Even though we are looping twice, these iterations are not nested. If the input is N, we can leave off the 2 which indicates the number of repeated iterations since that would be a constant factor.
+
+Why are constant factors (such as 2N) and lower order terms (N^2 + N becomes N^2) ignored when writing Big O notation?
+=> As the input to the function grows towards infinity, lower order terms and constant factors become insignificant compared to the term with the highest order of magnitude. 
+E.g: Imagine a runtime complexity of N + 10. When N is equal to 5, the constant factor appears significant, but with Big O we’re considering inputs (N) that approach infinity!
+
+Why don’t we use time-elapsed (5 minutes, for example) as a measurement for an algorithm’s runtime?
+Algorithms perform under many different circumstances (could be run on various CPUs, different programming languages, etc.), and time-elapsed is not coarse enough to communicate performance across those circumstances.
+=> Big O notation allows us to communicate the efficiency of an algorithm without worrying about the many different circumstances in which it will be run.
+
+Select the correct ordering of runtime complexity, from most efficient to least efficient.
+=> From left to right: Constant, Logarithmic, Linear, Quadratic, Exponential, Factorial.
+
+
+Stack Runtimes vs Queue Runtimes
+In addition to analyzing the runtimes of various data structures, it is also important to compare the runtimes of different data structures.
+
+We will compare the runtimes of retrieving the first value added to a queue to the runtime of retrieving the first value added to a stack.
+
+Removing the First Value Added to a Queue
+A queue is a FIFO (first in, first out) data structure, which means that the first element added to it, will always be the first element removed from it. Removing this element does not require you to iterate through the queue.
+
+Removing the First Value Added to a Stack
+On the other hand, a stack is a FILO (first in, last out) data structure. This means that the first element added will be the last element removed. Removing this element will require you to iterate through the stack, all the way to the bottom.
+
+The big O runtime of removing the first element added to a Queue is O(1), and the big O runtime of removing the first element added to a Stack is O(n).
+=> Since the element will be at the head of the queue, removing it is one step, so it is O(1). On the other hand, since the element will be at the bottom of the stack, removing it requires iterating through the whole stack, so it is O(n)
+
+While finding the first value added to a queue has a better big O runtime than doing so in a stack, consider finding the last value added. In a queue, we will have to iterate through the entire queue to retrieve the element at the end. This will be a big O runtime of O(n). On the other hand, the last value added to a stack is the value at the top of the stack, so removing it will just be a big O runtime of O(1).
+
+Hash Map Runtimes vs Linked List Runtimes
+Similarly, let’s compare the runtimes of searching for a particular element in a linked list and in a hash map.
+
+Retrieving an Element from a Linked List
+To find an element in a linked list, we will have to search through the entire list to see if the element is there. Refer to the findMax() function we looked at above for an example. Iterating through the list means that this process has a big O runtime of O(n).
+
+Retrieving an Element from a Hash Map
+Retrieving an element from a hash map is more efficient, due to its structure. Hash maps store information using key-value pairs, which means that every value is linked to a unique key. In order to find the value from the key, it uses the hash function, which has a big O runtime of O(1). If you don’t have to search through the entire data structure, retrieving an element from a hash map is faster than retrieving an element from a linked list.
+
+However, there is the possibility that the element you are looking for is not at the spot that you expect it to be. This happens when two keys have the same hash. There are a few ways hash maps resolve this issue, including separate chaining and open addressing.
+
+Close addressing - Separate Chaining
+One way to solve hash map collisions is to create a linked list at the array index where the collision occurred. All elements that hash to the same index will be in that list. This means that to find an element in a hash map that uses separate chaining, you must first find the correct index, and then search through the list at that index (if there is more than one element).
+
+Given the multiple steps required to retrieve an element from a hash map that uses separate chaining, what is the big O runtime of that retrieval?
+=> Big O(n); The worst case would be that all elements in the hash map hashed to the same index and are in one linked list with the element you’re looking for at the end of the list. To find it, you would have to iterate through the list, which means the big O runtime is O(n).
+
+Open Addressing
+Another way to solve hash map collisions is to simply move down the array until you find an open index, and place the element there. This is a type of open addressing that is called linear probing. When retrieving an element from a hash map that uses linear probing, the worst case would be if the element hashes to the first index, but is actually at the last index. Since you would have to search through the entire array, the big O runtime for retrieving an element from this kind of hash map is O(n).
+
+Assuming there are no hashing collisions, it’s faster to retrieve an element from a hash map than it is to retrieve an element from a linked list.
+=> True; Retrieving an element from a hash map has a constant big O runtime while removing an element from a linked list has a linear big O runtime.
+
+It’s faster to remove the first element added to a stack than it is to remove the first element added to a queue.
+=> False; Removing the first element added to a queue has a constant big O runtime, while removing the first element added to a stack has a linear big O runtime.
+
+Assuming there are no hashing collisions, it’s faster to retrieve an element from a hash map than it is to retrieve an element from a linked list.
+=> True; Retrieving an element from a hash map has a constant big O runtime while removing an element from a linked list has a linear big O runtime.
+
+Cheatsheet
+https://www.codecademy.com/learn/paths/back-end-engineer-career-path/tracks/becp-22-algorithms/modules/wdcp-22-asymptotic-notation/cheatsheet
+
+Additional Resources:
+
+Article: Big-O Cheat Sheet
+https://www.bigocheatsheet.com/
+
+Code Challenges:
+
+Intermediate - Calculate the Mean and Mode
+https://www.codecademy.com/code-challenges/code-challenge-calculate-the-mean-and-mode-javascript
+
+Intermediate - Stairmaster
+https://www.codecademy.com/code-challenges/code-challenge-stairmaster-javascript
+
+Intermediate - Maximize Stock Trading Profit
+https://www.codecademy.com/code-challenges/code-challenge-maximize-stock-trading-profit-javascript

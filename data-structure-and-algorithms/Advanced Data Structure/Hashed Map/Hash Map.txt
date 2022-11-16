@@ -25,6 +25,8 @@ return compressed hashCode
 
 collision: When two different keys resolve to the same array index this is called a collision.
 
+=> Solution: use linked lists and nodes inside the hashmap array. This will allow us to store multiple values at the same index by adding new nodes to a linked list instead of overwriting a single value. This strategy of handling collisions is called separate chaining.
+
 Recipe for saving to a hash table:
 - Take the key and plug it into the hash function, getting the hash code.
 - Modulo that hash code by the length of the underlying array, getting an array index.
@@ -38,10 +40,33 @@ Recipe for retrieving from a hash table:
 - If the key matches the one you're looking for, return the value.
 - If the keys don't match, continue to the next position depending on your collision strategy.
 
+Review
+We’ve learned together what a hash map is and how to create one. Let’s go over the concepts presented in this lesson.
 
+A hash map is:
+
+Built on top of an array using a special indexing system.
+A key-value storage with fast assignments and lookup.
+A table that represents a map from a set of keys to a set of values.
+Hash maps accomplish all this by using a hash function, which turns a key into an index into the underlying array.
+
+A hash collision is when a hash function returns the same index for two different keys.
+
+There are different hash collision strategies. Two important ones are separate chaining, where each array index points to a different data structure, and open addressing, where a collision triggers a probing sequence to find where to store the value for a given key.
 
 Hash maps are data structures that serve as efficient key-value stores. They are capable of assigning and retrieving data in the fastest way possible. This is because the underlying data structure that hash maps use is an array.
 
 A value is stored at an array index determined by plugging the key into a hash function. Because we always know exactly where to find values in a hash map, we have constant access to any of the values it contains.
 
 This quick access to values makes a hash map a good choice of data structure whenever we need to store a lot of values but need fast look-up time.
+
+Additional Resources:
+
+Visualizer: Hash Maps
+https://visualgo.net/en/hashtable?slide=1
+
+Video: Hash Maps
+https://www.youtube.com/watch?v=QuFPIZj55hU&feature=emb_title
+
+Cheatsheet: Hash Maps
+https://github.com/trekhleb/javascript-algorithms/tree/master/src/data-structures/hash-table
