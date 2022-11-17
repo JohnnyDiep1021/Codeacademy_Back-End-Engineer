@@ -1,0 +1,14 @@
+a compiler, is trying to translate your code so that your computer can understand and run it. However, the compiler is coming across a piece of code that it can’t interpret. As a result, it throws an error back to you to let you know that it has to stop and why.
+This information is logged as an error stack trace — a printed message containing information about where the error occurred, what type of error was thrown, and a description of the error.
+
+Using this stack trace, let’s answer three questions you should ask yourself every time you want to debug an error:
+
+In what line did the error occur? You can almost always find this information on the first line of the stack trace in the following format <file path>/<file name>:<line number>. In this example, the location is app.js:1. This means that the error was thrown in the file named app.js on line 1.
+What type of error was thrown? The first word on the fifth line of the stack trace is the type of error that was thrown. In this case, the type of error was ReferenceError. We will discuss this error type in the next exercise.
+What is the error message? The rest of the fifth line after the error type provides an error message, describing what went wrong. In this case, the description is myVariable is not defined.
+
+Cheatsheet
+https://www.codecademy.com/learn/paths/back-end-engineer-career-path/tracks/becp-22-javascript-syntax-part-ii/modules/wdcp-22-learn-javascript-syntax-errors-and-debugging/cheatsheet
+
+MDN document
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
