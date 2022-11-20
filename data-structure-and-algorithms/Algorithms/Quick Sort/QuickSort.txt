@@ -1,0 +1,108 @@
+Introduction to Quicksort
+Quicksort is an efficient recursive algorithm for sorting arrays or lists of values. The algorithm is a comparison sort, where values are ordered by a comparison operation such as > or <.
+
+Quicksort uses a divide and conquer strategy, breaking the problem into smaller sub-problems until the solution is so clear there’s nothing to solve.
+
+The problem: many values in the array which are out of order.
+
+The solution: break the array into sub-arrays containing at most one element. One element is sorted by default!
+
+We choose a single pivot element from the list. Every other element is compared with the pivot, which partitions the array into three groups.
+
+A sub-array of elements smaller than the pivot.
+The pivot itself.
+A sub-array of elements greater than the pivot.
+The process is repeated on the sub-arrays until they contain zero or one element. Elements in the “smaller than” group are never compared with elements in the “greater than” group. If the smaller and greater groupings are roughly equal, this cuts the problem in half with each partition step!
+
+[6,5,2,1,9,3,8,7]
+6 # The pivot
+[5, 2, 1, 3] # lesser than 6
+[9, 8, 7] # greater than 6
+ 
+ 
+[5,2,1,3]  # these values
+# will never be compared with 
+[9,8,7] # these values
+Depending on the implementation, the sub-arrays of one element each are recombined into a new array with sorted ordering, or values within the original array are swapped in-place, producing a sorted mutation of the original array.
+
+Instructions
+What does it mean for a list of values to be sorted? Use the terminology from your language of choice.
+
+Is it true that a list of one element is sorted? Why?
+
+Video resource
+https://www.youtube.com/watch?v=-oXfZUyA7Po&t=11s
+
+Quicksort Runtime
+The key to Quicksort’s runtime efficiency is the division of the array. The array is partitioned according to comparisons with the pivot element, so which pivot is the optimal choice to produce sub-arrays of roughly equal length?
+
+The graphic displays two data sets which always use the first element as the pivot. Notice how many more steps are required when the quicksort algorithm is run on an already sorted input. The partition step of the algorithm hardly divides the array at all!
+
+The worst case occurs when we have an imbalanced partition like when the first element is continually chosen in a sorted data-set.
+
+One popular strategy is to select a random element as the pivot for each step. The benefit is that no particular data set can be chosen ahead of time to make the algorithm perform poorly.
+
+Another popular strategy is to take the first, middle, and last elements of the array and choose the median element as the pivot. The benefit is that the division of the array tends to be more uniform.
+
+Quicksort is an unusual algorithm in that the worst case runtime is O(N^2), but the average case is O(N * logN).
+
+We typically only discuss the worst case when talking about an algorithm’s runtime, but for Quicksort it’s so uncommon that we generally refer to it as O(N * logN).
+
+Instructions
+With an already sorted dataset, would the division improve if we always chose the last element as the pivot? Why or why not?
+
+Video resource
+https://www.youtube.com/watch?v=BT7gWd8zRtA&feature=emb_title
+
+Quicksort Review
+Quicksort is an efficient algorithm for sorting values in a list. A single element, the pivot, is chosen from the list. All the remaining values are partitioned into two sub-lists containing the values smaller than and greater than the pivot element.
+
+Ideally, this process of dividing the array will produce sub-lists of nearly equal length, otherwise, the runtime of the algorithm suffers.
+
+When the dividing step returns sub-lists that have one or less elements, each sub-list is sorted. The sub-lists are recombined, or swaps are made in the original array, to produce a sorted list of values.
+
+Instructions
+Quicksort is a classic sorting algorithm with an excellent average runtime. Understanding the strategy behind quicksort will improve your ability to reason about sorting algorithms.
+
+Quiz: Quicksort: Conceptual
+For a recursive version of quicksort, what would be the base case when the algorithm stops recursing?
+=> when the array passed in as an argument is no larger than one element; A single element array is sorted. These elements are then either recombined, or if the sort was “in-place”, they’ve already been swapped into the correct locatio
+
+What role does the “pivot” element play in the quicksort algorithm?
+=> The pivot element is compared with other elements during the partition step; Other elements are placed into a “greater than” or “lesser than” sub-list based on a comparison with the pivot element.
+
+What is the benefit of randomly selecting a pivot element in quicksort?
+=> A random pivot element removes the possibility that any one data-set will in a poor Big O runtime; If the first element is always chosen as the pivot and the data-set is sorted, this would result in a O(n^2) runtime because the partition step only reduces the problem by a single element.
+
+In the partition step, the array is divided into two sub-arrays that contain values lesser than, or greater than, the pivot value.
+
+For quicksort to achieve the average case runtime of O(n*logn), what must be true during the partition step?
+=> The partition step must divide the array into two halves of roughly equal length; Ideally the “lesser than” and “greater than” sub-arrays will contain a similar number of elements. This reduces the number of recursive calls.
+
+If we always chose the first element as the pivot, what type of data-set would cause quicksort to have a O(n^2) runtime?
+=> A sorted data-set;  If the first element is chosen consistently and the data is already sorted, we’ll only reduce the problem by one element at each partition step. Ideally the partition step will divide the problem in half
+
+Quicksort is a comparison sort.
+=> True; Quicksort orders values in an array based on a comparison between the values.
+
+Which condition would NOT lead to a quicksort algorithm running in its worst case of O(N^2)?
+=> When a random element in the input array is chosen to be the pivot element; A random element would most likely result in balanced partitions and not lead to a worst case running time.
+
+Additional Resources:
+
+Interactive: Quicksort
+https://visualgo.net/en/sorting?slide=12
+
+Code Challenges:
+
+Intermediate - Top Score Sorter
+https://www.codecademy.com/code-challenges/code-challenge-top-score-sorter-javascript
+
+Intermediate - GetX
+https://www.codecademy.com/code-challenges/code-challenge-find-xth-number-in-order-javascript
+
+Cheatsheet
+https://www.codecademy.com/learn/paths/back-end-engineer-career-path/tracks/becp-22-algorithms/modules/wdcp-22-quicksort/cheatsheet
+
+
+

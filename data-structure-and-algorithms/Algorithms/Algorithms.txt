@@ -1,0 +1,50 @@
+Introduction 01: Algorithms
+
+The goal of this unit is to continue interview preparation by introducing you to the fundamentals of algorithms. 
+You will learn how to implement recursion and sorting algorithms and how to measure the computing efficiency of an algorithm. 
+These topics are practical knowledge for all stages of a job interview.
+
+After this unit, you will be able to:
+
+Identify and apply recursive algorithms
+Relate Big-O notation to algorithmic run time
+Sort data using the bubble, merge, and quicksort algorithms
+
+Introduction 02: Algorithms
+Let’s define what algorithms are and why they’re used in programming.
+
+What are Algorithms?
+When learning to program, we might’ve come across a mysterious term, “algorithm”. New vocabulary can be confusing at first, so let’s take away the mystique and define it. In programming, an algorithm is a series of step-by-step instructions that a developer gives to the computer to complete a task. All the code you’ve written so far has been algorithms!
+
+Let’s use a non-programming example to better familiarize ourselves. Think about recipes, they are a written series of steps that provide cooks instructions on how to make a dish. Now try to focus on one dish you know really well and visualize its recipe. Doesn’t that recipe sound very similar to how programming thinks about algorithms?
+
+Alright, time to bring our attention back to programming!
+
+Algorithms in Programming
+Algorithms are used all the time in programming! That’s because programming is essentially writing code to solve problems. And as developers, we’re tasked with solving things like performing mathematical calculations, finding the most optimal path to a destination, directing user traffic to avoid overloading a server, and everything in between. When we go about solving these problems, we are writing instructions for a computer to figure out the solution for us — which means we are creating algorithms.
+
+Well-Known Algorithms
+Some problems are so common that there are dedicated and well-known algorithms. One such common problem is being able to sort data. There are quite a few well-known algorithms such as:
+
+Bubble Sort
+https://en.wikipedia.org/wiki/Bubble_sort
+
+Merge Sort
+https://en.wikipedia.org/wiki/Merge_sort
+
+Quicksort
+https://en.wikipedia.org/wiki/Quicksort
+
+Since these algorithms are so well-known, they’re sometimes used as interview questions! Each algorithm eventually sorts an array of elements, but they all use different approaches. Don’t worry though, we’ll cover these algorithms and other helpful algorithms later on!
+
+Review
+Good work! We covered the definition of algorithms — which is a step-by-step series of instructions for a computer to complete a task. Algorithms pop up all the time in programming and there are even some special ones for commonly encountered problems.
+
+When tackling a programming problem, think about the logical series of steps to solve this problem — in other words, form an algorithm!
+
+Introduction to Sorting Algorithms
+Let’s get an overview of what sorting algorithms are and why they’re useful.
+
+Algorithms are created to solve all kinds of problems. Some algorithms even aim at solving the same problem if that problem is common enough. One such problem is trying to sort a collection of elements in a quick and efficient manner.
+
+There are many different sorting algorithms, but you are going to focus on three of the most common: bubble sort, merge sort, and quicksort. Each has pros and cons when it comes to their efficiency, as you’ll see when you build them. These are not all the possible sorts, but they are a good sampling of the most common sorting algorithms.

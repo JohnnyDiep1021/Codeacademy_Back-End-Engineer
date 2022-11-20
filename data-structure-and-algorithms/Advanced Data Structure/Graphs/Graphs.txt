@@ -15,6 +15,8 @@ This is a weighted graph, where edges have a number or cost associated with trav
 These costs are essential to algorithms that find the shortest distance between two vertices.
 Gym and Library are adjacent, there’s one edge between them, but there’s less total cost to travel from Gym to Bakery to Library (10 vs. 9). In a weighted graph, the shortest path is not always the least expensive.
 
+The critical thing to remember is the shortest path is not always the cheapest.
+
 Directed Graphs
 Imagine you’re a superhero escaping a villain’s lair. As you move from perilous room to perilous room, the doors close immediately behind you, barring any return.
 For this dramatic example, we need a directed graph, where edges restrict the direction of movement between vertices.
@@ -46,3 +48,33 @@ adjacency matrix: Graph representation where vertices are both the rows and the 
 adjacency list: Graph representation where each vertex has a list of all the vertices it shares an edge with.
 
 => Graphs are one of the most common data structures in computer science. Modeling complex problems with a graph is essential for a career in software development.
+
+Cheatsheet:
+https://www.codecademy.com/learn/graph-data-structures-java/modules/graphs-java/cheatsheet
+
+Implementation:
+https://www.codecademy.com/learn/complex-data-structures/modules/cspath-graphs/cheatsheet
+
+Additional Resources:
+
+Visualizer: Graphs
+https://visualgo.net/en/graphds?slide=1
+
+Video: Introduction to Graph Theory
+https://www.youtube.com/watch?v=5hPfm_uqXmw
+
+GitHub Repo: Graph JS Practice
+https://github.com/trekhleb/javascript-algorithms/tree/master/src/data-structures/graph
+
+Code Challenges:
+Beginner - Find the Town Judge
+https://leetcode.com/problems/find-the-town-judge/
+
+Beginner - Find Center of Star Graph
+https://leetcode.com/problems/find-center-of-star-graph/
+
+Intermediate - Clone Graph
+https://leetcode.com/problems/clone-graph/
+
+More Practice Problems
+https://leetcode.com/problemset/all/?search=graph
