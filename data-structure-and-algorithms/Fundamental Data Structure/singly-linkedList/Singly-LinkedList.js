@@ -256,6 +256,27 @@ console.log(findMiddle(subway));
 
 // Half-Speed
 // Another equally valid solution is to move the fast pointer once with each loop iteration but only move the slow pointer every-other iteration.
+
+// reverse Linked List
+function reverseLinkedList(linkedList) {
+  // Write your code here
+  // base case
+  if (!linkedList || !linkedList.next) {
+    return linkedList;
+  }
+  let reversed = reverseLinkedList(linkedList.next);
+  linkedList.next.next = linkedList;
+  linkedList.next = null;
+  return reversed;
+}
+
+// //Calling your function on an example
+// console.log("Original");
+// let exampleLinkedList = makeLinkedList([4, 8, 15]);
+// exampleLinkedList.print();
+// let reversed = reverseLinkedList(exampleLinkedList);
+// reversed.print();
+
 const findMiddleAlternate = (linkedList) => {
   let count = 0;
   let fast = linkedList.head;
