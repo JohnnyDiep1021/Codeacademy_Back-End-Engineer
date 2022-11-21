@@ -44,7 +44,7 @@ One popular strategy is to select a random element as the pivot for each step. T
 
 Another popular strategy is to take the first, middle, and last elements of the array and choose the median element as the pivot. The benefit is that the division of the array tends to be more uniform.
 
-Quicksort is an unusual algorithm in that the worst case runtime is O(N^2), but the average case is O(N * logN).
+Quicksort is an unusual algorithm in that the worst case runtime is O(N^2) when the pivot is the largest or smalles value, but the average case is O(N * logN).
 
 We typically only discuss the worst case when talking about an algorithm’s runtime, but for Quicksort it’s so uncommon that we generally refer to it as O(N * logN).
 
