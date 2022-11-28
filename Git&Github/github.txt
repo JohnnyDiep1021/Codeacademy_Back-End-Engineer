@@ -1,0 +1,11 @@
+A project managed with Git is called a Git repository.
+GitHub is a popular hosting service for Git repositories. GitHub allows you to store your local Git repositories in the cloud. With GitHub, you can backup your personal files, share your code, and collaborate with others.
+Git is defined as a version control system that’s maintained on your local system. It helps you manage and record your source code history. 
+GitHub, on the other hand, is a hosting service for repositories. 
+Simply put, Git is the tool and GitHub is the service for projects that use Git.
+The basic workflow used with GitHub:
+1. Create a branch
+2. Commit changes
+3. Create a pull request
+4. Review pull request
+5. Merge and delete branch
