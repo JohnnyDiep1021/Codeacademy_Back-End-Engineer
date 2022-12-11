@@ -32,7 +32,6 @@ class MinHeap {
     this.heapify();
     return min;
   }
-
   add(value) {
     this.heap.push(value);
     console.log(`.. adding ${value}`);
@@ -41,6 +40,13 @@ class MinHeap {
     console.log(`added ${value} to heap`, this.heap);
   }
   bubbleUp() {
+    /*
+    //       Set the current element index to be the last index of heap
+    // While current element is valid and its value is less than its parent's value
+    //  Swap the indexes
+    //  Update the current element index to be its parent index
+    */
+
     let current = this.size;
     while (
       current > 1 &&
