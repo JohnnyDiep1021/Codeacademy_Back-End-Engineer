@@ -101,6 +101,7 @@ for (let i = 0; i < 3; i++) {
   }
 }
 
+console.log(tree);
 tree.print();
 tree.depthFirstTraversal();
 tree.breadthFirstTraversal();

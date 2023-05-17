@@ -2,6 +2,13 @@
 // In a min-heap, for any given element, its parent’s value is less than or equal to its value.
 // Heaps enable solutions for complex problems such as finding the shortest path (Dijkstra’s Algorithm) or efficiently sorting a dataset (heapsort).
 
+/*
+Binary Heap => left to right insertion
+
++ Lookup O(n)
++ Insert O(log N)
++ delete O(log N)
+*/
 class MinHeap {
   /* 
   // min heap needs to satisfy two conditions:
